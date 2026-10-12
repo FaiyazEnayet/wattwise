@@ -1,0 +1,28 @@
+[project]
+name = "wattwise"
+version = "0.1.0"
+description = "Home energy analytics for a Long Island house on PSEG: bill forecasting, TOU vs flat comparison, LP load-shifting optimizer"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "plotly",
+    "matplotlib",
+    "pillow",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
