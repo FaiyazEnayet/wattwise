@@ -13,7 +13,7 @@ Home energy analytics for a Long Island house on PSEG. It answers three question
 
 ![wattwise dashboard tour](docs/demo.gif)
 
-The animation above is rendered from the demo data by `scripts/make_demo_gif.py`.
+
 
 ## What it does
 
