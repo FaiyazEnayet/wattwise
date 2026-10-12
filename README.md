@@ -25,7 +25,7 @@ The animation above is rendered from the demo data by `scripts/make_demo_gif.py`
 
 **Appliance disaggregation.** From the whole-house meter alone, a non-negative least-squares split estimates each appliance's daily share. Mean error 1.17 kWh/day per appliance on the demo data, learned from the household's own history.
 
-**Anomaly radar.** Days far from the household's same-weekday baseline get flagged and explained in plain words. Example from the demo: "Friday Oct 02 ran 91% hot: an extra 10.0 kWh, peaking 6 PM-7 PM — looks like laundry, water heater, cooking."
+**Anomaly radar.** Days far from the household's same-weekday baseline get flagged and explained in plain words. Example from the demo: "Friday Oct 02 ran 91% hot: an extra 10.0 kWh, peaking 6 PM-7 PM. Looks like laundry, water heater, cooking."
 
 **Weather correlation.** Daily usage regressed on degree-days: temperature explains 57% of day-to-day variance here, at 1.273 kWh per cooling degree-day and 0.415 per heating degree-day.
 
