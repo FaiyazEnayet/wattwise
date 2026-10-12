@@ -13,7 +13,7 @@ Home energy analytics for a Long Island house on PSEG. It answers three question
 
 ![wattwise dashboard tour](docs/demo.gif)
 
-
+The animation above is rendered from the demo data by `scripts/make_demo_gif.py`.
 
 ## What it does
 
@@ -93,20 +93,20 @@ print(monthly_bill(hourly, Rate194()))
 
 ## Project layout
 
-- `src/wattwise/rates.py` — PSEG LI Rate 180/194 from the published tariff
-- `src/wattwise/greenbutton.py` — Green Button XML importer
-- `src/wattwise/profile.py` — synthetic demo load + weather generator
-- `src/wattwise/forecast.py` — Fourier/trend/degree-day forecaster
-- `src/wattwise/disagg.py` — NNLS appliance disaggregation
-- `src/wattwise/anomalies.py` — spike detection with explanations
-- `src/wattwise/weather.py` — degree-day regression
-- `src/wattwise/optimize.py` — LP load-shifting optimizer
-- `src/wattwise/whatif.py` — solar, EV, heat pump scenarios
-- `src/wattwise/analyze.py` — bill math, plan comparison, waterfall
-- `scripts/` — demo builder, dashboard builder, GIF renderer
-- `demo/` — synthetic profile, weather, and measured metrics
-- `docs/` — dashboard.html and demo.gif
-- `tests/` — 55 tests
+- `src/wattwise/rates.py`: PSEG LI Rate 180/194 from the published tariff
+- `src/wattwise/greenbutton.py`: Green Button XML importer
+- `src/wattwise/profile.py`: synthetic demo load + weather generator
+- `src/wattwise/forecast.py`: Fourier/trend/degree-day forecaster
+- `src/wattwise/disagg.py`: NNLS appliance disaggregation
+- `src/wattwise/anomalies.py`: spike detection with explanations
+- `src/wattwise/weather.py`: degree-day regression
+- `src/wattwise/optimize.py`: LP load-shifting optimizer
+- `src/wattwise/whatif.py`: solar, EV, heat pump scenarios
+- `src/wattwise/analyze.py`: bill math, plan comparison, waterfall
+- `scripts/`: demo builder, dashboard builder, GIF renderer
+- `demo/`: synthetic profile, weather, and measured metrics
+- `docs/`: dashboard.html and demo.gif
+- `tests/`: 55 tests
 
 ## Limitations
 
