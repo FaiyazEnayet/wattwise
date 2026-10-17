@@ -10,7 +10,7 @@ WattWise explores where a household uses electricity and which modeled changes r
 
 **Python · tariff arithmetic · forecasting and optimization**
 
-[![WattWise demo](docs/demo.gif)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
+[![WattWise demo](docs/demo.gif?v=data-20261017)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
 
 ## Explore
