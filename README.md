@@ -33,6 +33,10 @@ Hourly usage is priced under flat and time-of-use tariffs. A load-shifting optim
 | October forecast | $84.26; source band $73.75 to $94.76 |
 | Scenario scope | Solar, EV and heat-pump figures are planning estimates |
 
+## Updating this project
+
+Dashboard source language: **Python**. Generator: `scripts/make_dashboard.py`. To keep the interactive page, figures, data animation, and README consistent, follow [the coding-agent update guide](AGENT-DASHBOARD-GUIDE.md). The local interactive output is `docs/dashboard.html`.
+
 ## Run locally
 
 
