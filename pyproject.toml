@@ -5,7 +5,7 @@ description = "Home energy analytics for a Long Island house on PSEG: bill forec
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-dependencies = [
+dependencies = ["beautifulsoup4>=4.11", 
     "numpy",
     "pandas",
     "scipy",
