@@ -1,17 +1,18 @@
-<p align="center"><img src="docs/readme-banner.svg" alt="WattWise: Household energy decisions with inspectable assumptions" width="1200"></p>
+<p align="center"><img src="docs/readme-banner.svg?v=type-20261017b" alt="WattWise: Household energy decisions with inspectable assumptions" width="1200"></p>
 
 [![Tests](https://github.com/FaiyazEnayet/wattwise/actions/workflows/ci.yml/badge.svg)](https://github.com/FaiyazEnayet/wattwise/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-007EC6)](LICENSE) ![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB) ![Built with SciPy + energy analytics](https://img.shields.io/badge/built%20with-SciPy%20%2B%20energy%20analytics-555555) [![Interactive demo](https://img.shields.io/badge/demo-interactive-4C9D39)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
-<p align="center"><a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><b>Open interactive demo</b></a> · <a href="docs/dashboard.html">HTML file</a> · <a href="#method">Method</a> · <a href="#run-locally">Run locally</a> · <a href="#limitations">Limitations</a></p>
+<p align="center"><a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><b>Open interactive demo</b></a> · <a href="#method">Method</a> · <a href="#run-locally">Run locally</a></p>
 
 # WattWise
 
 WattWise explores where a household uses electricity and which modeled changes reduce its bill. It combines load profiles, tariff calculations, forecasts, appliance estimates and constrained load shifting.
 
-**Python · tariff arithmetic · forecasting and optimization**
 
-[![WattWise demo](docs/demo.gif?v=data-20261017)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
+[![WattWise demo](docs/demo.gif?v=showcase-20261017b)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
+
+A lower bill can come from moving demand to cheaper hours without reducing total energy use. Compare the optimized load profile with the tariff schedule and appliance constraints before interpreting savings. Forecast bands and weather relationships provide context for uncertainty, while the seeded household profile keeps the example reproducible.
 
 ## Explore
 
