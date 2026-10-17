@@ -242,10 +242,20 @@ def main():
 
     os.makedirs(DOCS, exist_ok=True)
     out = os.path.join(DOCS, "dashboard.html")
-    fig.write_html(out, include_plotlyjs=True, full_html=True,
-                   config={"displaylogo": False})
+    with open(out, "w", encoding="utf-8") as fh:
+        fh.write(_portfolio_html(fig.to_html(include_plotlyjs=True, full_html=True, config={"displaylogo": False})))
     print(f"dashboard -> {out} ({os.path.getsize(out)/1e6:.1f} MB)")
 
+
+
+def _portfolio_html(raw):
+    """Presentation-only transform of this run’s freshly calculated figures."""
+    import sys
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "portfolio_ui"))
+    from renderer import render_html
+    return render_html(root, 'wattwise', raw)[0]
 
 if __name__ == "__main__":
     main()
