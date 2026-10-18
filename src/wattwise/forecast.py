@@ -21,10 +21,19 @@ import pandas as pd
 
 
 def _design_matrix(dates: pd.DatetimeIndex, cdd: np.ndarray,
-                   hdd: np.ndarray, n_fourier: int = 2) -> np.ndarray:
+                   hdd: np.ndarray, n_fourier: int = 2,
+                   origin: pd.Timestamp = None) -> np.ndarray:
+    """Design matrix with time coordinates relative to a calendar origin.
+
+    `t` is elapsed days from `origin` (defaults to the first date), so
+    trend and Fourier phase are continuous across fit and predict. Do
+    NOT use arange(n): that resets the coordinates for every call.
+    """
     n = len(dates)
     dow = dates.weekday.to_numpy()
-    t = np.arange(n, dtype=float)
+    if origin is None:
+        origin = dates[0]
+    t = (dates - origin).days.to_numpy().astype(float)
     cols = [np.ones(n), t]
     # Day-of-week dummies (drop Monday as reference).
     for d in range(1, 7):
@@ -52,6 +61,7 @@ class BillForecaster:
         self.n_fourier = n_fourier
         self.coef_ = None
         self.resid_std_ = None
+        self._origin = None  # calendar origin for time coordinates
 
     def fit(self, hourly_kwh: pd.Series, temp_f: pd.Series = None):
         daily = hourly_kwh.resample("D").sum()
@@ -61,8 +71,12 @@ class BillForecaster:
             dd = dd.reindex(daily.index, fill_value=0.0)
         else:
             dd = pd.DataFrame({"cdd": 0.0, "hdd": 0.0}, index=daily.index)
+        # Persist the calendar origin: every timestamp becomes elapsed
+        # days from here, so predict() continues the same coordinates.
+        self._origin = daily.index[0]
         X = _design_matrix(daily.index, dd["cdd"].to_numpy(),
-                           dd["hdd"].to_numpy(), self.n_fourier)
+                           dd["hdd"].to_numpy(), self.n_fourier,
+                           origin=self._origin)
         y = daily.to_numpy()
         coef, *_ = np.linalg.lstsq(X, y, rcond=None)
         self.coef_ = coef
@@ -81,7 +95,7 @@ class BillForecaster:
         else:
             dd = pd.DataFrame({"cdd": 0.0, "hdd": 0.0}, index=dates)
         X = _design_matrix(dates, dd["cdd"].to_numpy(), dd["hdd"].to_numpy(),
-                           self.n_fourier)
+                           self.n_fourier, origin=self._origin)
         mu = X @ self.coef_
         mu = np.clip(mu, 0.5, None)  # houses don't use negative energy
         half = 1.2816 * self.resid_std_
