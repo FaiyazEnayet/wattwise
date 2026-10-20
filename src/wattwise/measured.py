@@ -10,8 +10,9 @@ emails with all identifying fields stripped:
   2026-10-19, 4,086.55 kWh. Aggregated to hourly, the intervals
   supply the intraday SHAPE of the measured profile (own-day shape
   where the export covers the date, season/day-type average shape
-  otherwise). Interval sums per billing period reconcile to the
-  billed kWh within +0.7% to +3.7% on full periods; the
+  otherwise). With end-exclusive periods and detailed line-item
+  totals, interval sums are within 0.49% of billed kWh for all 12
+  fully covered periods; the
   holiday-adjusted weekday 3-7 PM peak reproduces the billed peak
   kWh within a few kWh, validating the rate window.
 - Weekly Usage Summary emails give cumulative kWh per billing period
