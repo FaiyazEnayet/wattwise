@@ -1,6 +1,6 @@
 [project]
 name = "wattwise"
-version = "0.1.0"
+version = "1.2.0"
 description = "Home energy analytics for a Long Island house on PSEG: bill forecasting, TOU vs flat comparison, LP load-shifting optimizer"
 readme = "README.md"
 license = { text = "MIT" }

@@ -1,6 +1,33 @@
 # Changelog
 
-## v1.4.0
+## v1.2.0
+
+### Added
+- Full-history decision analysis on original meter intervals, with input fingerprints, explicit DST eligibility and end-exclusive bill reconciliation.
+- Six-workspace dashboard with bill Shapley attribution, three-plan tariff replay and monthly regret, combined counterfactual savings, a flexibility frontier and contiguous task scheduling.
+- Port Jefferson ERA5 cooling analysis with moving-week uncertainty and visible baseline comparisons; building-paid heating excluded.
+- Three-model chronological forecast selection, an untouched final holdout, empirical coverage and an explicitly limited open-bill planning subtotal.
+- Local intervention notebook with import/export, unadjusted comparisons and earlier weekday/temperature matched controls with overlap refusal.
+- Discounted two-scenario decision and perfect-information calculator; cumulative 7-, 14- and 28-day forecast evaluation with calibration targets ending before the holdout.
+- Source-backed research figures and an animated chronological meter-history demonstration.
+- Separate browser arithmetic tests and CI dashboard regeneration. Existing insights CLI retained; new `wattwise analyze` command added.
+
+### Fixed
+- Billing reconciliation included the next period's first day and reused superseded chart totals. Twelve complete line-item periods now reconcile within 0.5% without changing the readings.
+- Multi-year tariff windows now use holidays from every represented year in the audited analysis.
+- Rate 180 summer energy uses incremental blocks instead of repricing the first 250 kWh at the upper marginal rate; the seeded calibration calls the same charge function.
+- Utility appliance cost estimates are kept in dollars rather than presented as measured end-use kWh in the new dashboard.
+
+### Evidence and limits
+- Rate replay, hypothetical flexible energy and AC runtime remain declared scenarios, not guaranteed savings.
+- The descriptive cooling model loses its held-out comparison; weekly persistence slightly beats the selected autoregression on the final holdout. Both findings remain visible.
+- CSV DST conventions, multiday interval calibration, complete future-bill adjustments and causal intervention validation remain explicit limitations.
+
+## Earlier development history
+
+The working-version headings in earlier notes were not published release tags. Their implementation history is retained below; the new published release is v1.2.0.
+
+### Insights engine development
 
 ### Added
 - `wattwise.insights` module: decision support computed from the
@@ -21,7 +48,7 @@
   $1.64 cost impact; flagged by the drift alert.
 - Top cost drivers: cooling ($18), laundry ($16), always-on ($12).
 
-## v1.3.0
+### Detailed bill data development
 
 ### Added
 - `demo/pseg_rates_detailed.csv`: the full line-item rate breakdown of
@@ -104,7 +131,7 @@
   loader); the Aug 2025 monthly row now asserts its 472 kWh from
   the portal comparison. Full suite 76/76 green.
 
-## v1.2.0
+### Measured data development
 
 ### Added
 - Real measured PSEG Long Island billing history in `demo/pseg_bills.csv`
