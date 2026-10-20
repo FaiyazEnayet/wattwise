@@ -22,7 +22,10 @@ from wattwise import (
     savings_waterfall, make_measured_profile, history_summary,
 )
 from wattwise.measured import (ANCHOR_KWH, ANCHOR_BILL_USD,
-                               ANCHOR_PEAK_COST_USD)
+                               ANCHOR_PEAK_COST_USD, ANCHOR_PEAK_KWH,
+                               ANCHOR_OFFPEAK_KWH, ANCHOR_ENERGY_CHARGES_USD,
+                               ANCHOR_TAXES_FEES_USD, interval_reconciliation)
+from wattwise.rates import Rate194History
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEMO = os.path.join(HERE, "..", "demo")
@@ -147,14 +150,16 @@ def main():
 
 
 def build_measured():
-    """Run the pipeline on the measured-anchored Sep 2026 profile and
-    write demo/real_metrics.json + demo/real_profile.csv.
+    """Run the pipeline on the measured Sep 2026 profile and write
+    demo/real_metrics.json + demo/real_profile.csv.
 
     Period totals (320.25 kWh), the appliance mix and the actual bill
     ($109.01, Rate 194) are measured PSEG data; the intraday shape is
-    the modeled seeded shape, so modeled bill/optimizer figures below
-    are model outputs on a measured-calibrated profile, not meter
-    readings.
+    now measured too (the 15-minute smart-meter export, own-day shape
+    for Sep 19 - Oct 1 and the measured fall average shape earlier in
+    the month). Only the appliance split within each hour is modeled.
+    Also writes demo/pseg_interval_validation.csv: per-period
+    interval-vs-billed reconciliation.
     """
     hourly, end_use, _temp = make_measured_profile()
     hourly.to_frame().to_csv(os.path.join(DEMO, "real_profile.csv"),
@@ -166,6 +171,12 @@ def build_measured():
     rm["measured_bill_actual_usd"] = ANCHOR_BILL_USD
     rm["measured_peak_cost_actual_usd"] = ANCHOR_PEAK_COST_USD
     rm["measured_avg_daily_kwh"] = round(ANCHOR_KWH / 30, 2)
+    # Portal monthly summary for the anchor period: measured
+    # time-of-day split and charge composition.
+    rm["measured_peak_kwh"] = ANCHOR_PEAK_KWH
+    rm["measured_offpeak_kwh"] = ANCHOR_OFFPEAK_KWH
+    rm["measured_energy_charges_usd"] = ANCHOR_ENERGY_CHARGES_USD
+    rm["measured_taxes_fees_usd"] = ANCHOR_TAXES_FEES_USD
 
     # What wattwise's tariff model computes on the same usage.
     rm["modeled_bill_tou_usd"] = monthly_bill(hourly, rate194)["total"]
@@ -191,15 +202,57 @@ def build_measured():
         for i, r in bd.iterrows()
     ]
     rm["history"] = history_summary()
+
+    # Interval validation: per-period interval sums vs billed kWh,
+    # and interval-derived peak vs the billed peak (Rate 194 window).
+    recon = interval_reconciliation()
+    hist = Rate194History()
+    valid = hist.validation_report()
+    billed_peak = {r["bill_date"]: r["actual"] for r in valid}  # noqa
+    recon_csv = []
+    for row in recon:
+        recon_csv.append({
+            "period_start": row["period_start"],
+            "period_end": row["period_end"],
+            "billed_kwh": ("" if row["billed_kwh"] is None
+                           else round(row["billed_kwh"], 2)),
+            "interval_kwh": row["interval_kwh"],
+            "interval_peak_kwh": row["interval_peak_kwh"],
+            "n_intervals": row["n_intervals"],
+        })
+    pd.DataFrame(recon_csv).to_csv(os.path.join(DEMO,
+                                                "pseg_interval_validation.csv"),
+                                   index=False)
+    full = [r for r in recon
+            if r["billed_kwh"] and r["n_intervals"] >= 28 * 96]
+    errs = [100 * (r["interval_kwh"] - r["billed_kwh"]) / r["billed_kwh"]
+            for r in full]
+    sep_row = next(r for r in recon if r["period_start"] == "2026-09-02")
+    rm["interval_validation"] = {
+        "periods_with_full_interval_coverage": len(full),
+        "interval_kwh_vs_billed_kwh_max_abs_pct": (
+            round(max(abs(e) for e in errs), 2) if errs else None),
+        "interval_kwh_vs_billed_kwh_mean_abs_pct": (
+            round(sum(abs(e) for e in errs) / len(errs), 2) if errs else None),
+        "sep2026_interval_kwh": sep_row["interval_kwh"],
+        "sep2026_interval_peak_kwh": sep_row["interval_peak_kwh"],
+        "sep2026_billed_peak_kwh": ANCHOR_PEAK_KWH,
+    }
+
     rm["generated_at"] = dt.datetime.now().isoformat()
     rm["data_note"] = (
         "MEASURED PSEG Long Island data. Period kWh totals, appliance "
         "mix and bills come from utility emails (weekly usage "
-        "summaries, bill notices, appliance dollar estimates); see "
-        "demo/pseg_bills.csv and demo/pseg_appliance_estimates.csv. "
-        "Intraday hourly shape is modeled (seeded), not metered "
-        "interval data, so modeled bills and optimizer savings are "
-        "model outputs on a measured-calibrated profile.")
+        "summaries, bill notices, appliance dollar estimates) and "
+        "the utility's customer portal (exact bill history, yearly "
+        "energy chart, monthly time-of-day summary); see "
+        "demo/pseg_bills.csv, demo/pseg_monthly.csv and "
+        "demo/pseg_appliance_estimates.csv. The intraday hourly shape "
+        "is measured: 15-minute smart-meter intervals (Sep 19 - Oct 1 "
+        "use each date's own profile; earlier days the measured fall "
+        "average shape). Only the appliance split within each hour is "
+        "modeled, so optimizer savings are model outputs on a "
+        "measured profile.")
     with open(os.path.join(DEMO, "real_metrics.json"), "w") as f:
         json.dump(rm, f, indent=2)
     print(json.dumps(rm, indent=2))

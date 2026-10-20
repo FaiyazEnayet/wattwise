@@ -1,0 +1,8 @@
+observed_date,topic,detail,source
+2026-10-13,peak window,Peak hours 3-7 PM weekdays; off-peak = remaining 20 hours weekdays + all day weekends/federal holidays,Time-of-Day rate email
+2026-10-13,rate name,"Time-of-Day Rate 194 (first year on TOD, customer since ~Oct 2025)",Time-of-Day rate email
+2026-06-09,peak pricing,"Peak usage costs approximately 2x per kWh; peak-hour spend per billing period: Feb 2026 $20, Apr $17, May $16, Aug $19, Sep $19 (insight email subjects)",energy insights email
+2026-02-18,power supply,Power Supply Charge increased significantly in Feb 2026; utility expects elevated levels for a few more months (natural-gas driven); passed through with no markup; applies to all rates,energy price update email
+2026-06-09,estimates note,"Bidgely appliance estimates exclude daily basic service charge and taxes; approximated from meter data, may differ slightly from bill",energy insights email
+2026-10-13,peak cost share,"$19 of the Sep 2026 bill ($109.01, 17.4%) came from peak-hour usage; Aug 2026 peak spend also $19, May $16, Apr $17, Feb $20 (insight email subjects)",energy insights emails
+2026-10-19,portal peak/off-peak split,"Sep 2026 (Sep 02 - Oct 01): 281 kWh off-peak at $63 plus 39 kWh peak at $19 = 320 kWh, $82 energy charges, $27 taxes/fees, $109 total; peak usage down 7% vs prior period; top peak contributors cooling 30% and always-on 13%",portal monthly summary

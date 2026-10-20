@@ -7,6 +7,11 @@ laundry, dishwasher, lighting) with weekday/weekend behavior and
 seeded randomness, then scaled so the trailing 30-day bill under
 Rate 180 (flat, nonsummer) lands near $109.
 
+The end-use intraday windows were sanity-checked against one real
+hourly day from the portal (Saturday 2026-10-17,
+demo/pseg_hourly_oct17.csv) and adjusted toward its bimodal shape
+(midday peak ~1 PM, smaller late-evening peak, late-night tail).
+
 DEMO DATA IS SYNTHETIC. Real analysis uses read_greenbutton_xml on
 an actual PSEG export; the importer path is what makes this real-world
 usable.
@@ -69,15 +74,25 @@ def _appliance_shapes(hours: pd.DatetimeIndex, temp_f: pd.Series,
     shapes["hvac"] = 0.45 * cdh + 0.18 * hdh + rng.normal(0, 0.02, n)
 
     # Water heater: 4.5 kW element, morning + evening recovery windows.
+    # Morning recovery runs at full duty after showers; the evening
+    # recovery is spread over 18-21h at partial duty. Shape check
+    # against the one real hourly day available (portal, Sat
+    # 2026-10-17): the original twin full-duty blocks stacked with
+    # cooking, laundry and the dishwasher to put ~47% of a Saturday
+    # into 17-21h, versus ~23% measured.
     wh = np.zeros(n)
     wh[(hour >= 6) & (hour < 8)] = 4.5
-    wh[(hour >= 18) & (hour < 20)] = 4.5
-    shapes["water_heater"] = wh * rng.uniform(0.85, 1.0, n)
+    wh_duty = np.where((hour >= 18) & (hour < 21),
+                       rng.uniform(0.45, 0.65, n),
+                       rng.uniform(0.85, 1.0, n))
+    wh[(hour >= 18) & (hour < 21)] = 4.5
+    shapes["water_heater"] = wh * wh_duty
 
-    # Cooking: evening peak, bigger on weekends.
+    # Cooking: evening peak, bigger on weekends. Weekend lunch runs
+    # 12-14h (was 12-13h): the measured Saturday peaks at ~1 PM.
     cook = np.zeros(n)
     cook[(hour >= 17) & (hour < 19)] = 1.6
-    cook[(hour >= 12) & (hour < 13) & ~weekday] = 1.0
+    cook[(hour >= 12) & (hour < 14) & ~weekday] = 1.2
     shapes["cooking"] = cook * rng.uniform(0.8, 1.1, n)
 
     # Dishwasher: 1.1 kW after dinner, daily.
@@ -85,19 +100,28 @@ def _appliance_shapes(hours: pd.DatetimeIndex, temp_f: pd.Series,
     dw[(hour >= 20) & (hour < 22)] = 1.1
     shapes["dishwasher"] = dw * rng.uniform(0.9, 1.05, n)
 
-    # Laundry: washer+dryer 2.8 kW, ~4 evenings a week.
+    # Laundry: washer+dryer 2.8 kW, ~4 days a week. Weekday loads run
+    # in the evening; weekend loads run late morning. The measured
+    # Saturday (2026-10-17) puts ~31% of the day in 10 AM-2 PM with
+    # its peak at ~1 PM, where the evening-only window left midday at
+    # ~20% and stacked laundry on top of every other evening load.
     laundry_days = rng.random(len(pd.unique(hours.date))) < 4 / 7
     day_idx = (hours.normalize() - hours.normalize()[0]).days.to_numpy()
+    is_ld = laundry_days[day_idx]
     ld = np.zeros(n)
-    evening = (hour >= 19) & (hour < 21)
-    ld[evening & laundry_days[day_idx]] = 2.8
+    ld[(hour >= 19) & (hour < 21) & weekday & is_ld] = 2.8
+    ld[(hour >= 10) & (hour < 12) & ~weekday & is_ld] = 2.8
     shapes["laundry"] = ld
 
-    # Lighting + plug loads: evening hump, morning bump.
+    # Lighting + plug loads: evening hump, morning bump. The hump
+    # runs to midnight (was 11 PM) and weekend nights spill into the
+    # midnight hour: the measured Saturday stays at ~5% of the day
+    # through 11 PM and its midnight hour alone is ~5.7%.
     light = np.zeros(n)
     light[(hour >= 6) & (hour < 8)] = 0.25
-    light[(hour >= 17) & (hour < 23)] = 0.55
+    light[(hour >= 17) & (hour < 24)] = 0.55
     light[~weekday & (hour >= 9) & (hour < 17)] = 0.30
+    light[(hour == 0) & ~weekday] = 0.35
     shapes["lighting_plug"] = light * rng.uniform(0.9, 1.1, n)
 
     for k in shapes:

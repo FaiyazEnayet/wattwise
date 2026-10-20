@@ -1,34 +1,34 @@
 {
   "bill_flat_30d": 109.01,
-  "bill_tou_30d": 101.98,
+  "bill_tou_30d": 99.95,
   "kwh_30d": 345.5,
   "cheaper_plan": "time-of-day (Rate 194)",
-  "plan_difference": 7.03,
-  "peak_kwh_pct": 12.8,
-  "peak_cost_pct": 24.8,
-  "opt_cost_before": 85.78,
-  "opt_cost_after": 80.52,
-  "opt_savings": 5.26,
-  "opt_savings_pct": 6.13,
-  "opt_shifted_kwh": 156.3,
-  "forecast_7d_kwh": 69.2,
-  "forecast_7d_actual_kwh": 72.1,
-  "forecast_7d_err_pct": 3.97,
-  "forecast_bill": 86.8,
-  "forecast_bill_lo": 79.13,
-  "forecast_bill_hi": 94.47,
-  "disagg_mae_kwh_per_day": 1.145,
-  "disagg_recon_rmse": 0.1201,
+  "plan_difference": 9.06,
+  "peak_kwh_pct": 10.6,
+  "peak_cost_pct": 21.0,
+  "opt_cost_before": 83.75,
+  "opt_cost_after": 80.61,
+  "opt_savings": 3.14,
+  "opt_savings_pct": 3.75,
+  "opt_shifted_kwh": 148.6,
+  "forecast_7d_kwh": 70.3,
+  "forecast_7d_actual_kwh": 69.8,
+  "forecast_7d_err_pct": 0.78,
+  "forecast_bill": 85.33,
+  "forecast_bill_lo": 78.24,
+  "forecast_bill_hi": 92.42,
+  "disagg_mae_kwh_per_day": 1.276,
+  "disagg_recon_rmse": 0.1401,
   "anomaly_detected": true,
-  "anomaly_text": "Friday Oct 02 ran 99% hot: an extra 11.1 kWh, peaking 8 PM-9 PM \u2014 looks like laundry, water heater, cooking.",
-  "anomaly_excess_kwh": 11.1,
-  "weather_r2": 0.683,
-  "cooling_kwh_per_cdd": 1.254,
-  "heating_kwh_per_hdd": 0.461,
-  "weather_share": 0.279,
-  "solar_monthly_saving": 40.42,
-  "solar_payback_years": 34.2,
-  "solar_bill_after": 61.56,
+  "anomaly_text": "Friday Oct 02 ran 100% hot: an extra 11.2 kWh, peaking 8 PM-9 PM \u2014 looks like laundry, water heater, lighting plug.",
+  "anomaly_excess_kwh": 11.16,
+  "weather_r2": 0.711,
+  "cooling_kwh_per_cdd": 1.445,
+  "heating_kwh_per_hdd": 0.467,
+  "weather_share": 0.291,
+  "solar_monthly_saving": 39.48,
+  "solar_payback_years": 35.0,
+  "solar_bill_after": 60.47,
   "ev_added_monthly_cost": 57.95,
   "ev_cost_per_mile_cents": 6.4,
   "hp_added_monthly_cost": 43.35,
@@ -39,27 +39,32 @@
     },
     {
       "label": "Switch to time-of-day (Rate 194)",
-      "delta": -7.03
+      "delta": -9.06
     },
     {
       "label": "Shift flexible loads off-peak",
-      "delta": -5.26
+      "delta": -3.14
     },
     {
       "label": "Add 6 kW rooftop solar",
-      "delta": -35.16
+      "delta": -36.34
     }
   ],
   "appliance_breakdown": [
     {
       "appliance": "water_heater",
-      "kwh": 118.5,
-      "pct": 34.3
+      "kwh": 112.3,
+      "pct": 32.5
     },
     {
       "appliance": "hvac",
-      "kwh": 98.7,
-      "pct": 28.6
+      "kwh": 98.5,
+      "pct": 28.5
+    },
+    {
+      "appliance": "lighting_plug",
+      "kwh": 37.6,
+      "pct": 10.9
     },
     {
       "appliance": "baseload",
@@ -67,26 +72,21 @@
       "pct": 9.9
     },
     {
-      "appliance": "lighting_plug",
-      "kwh": 32.7,
-      "pct": 9.5
-    },
-    {
       "appliance": "cooking",
-      "kwh": 23.8,
-      "pct": 6.9
+      "kwh": 26.7,
+      "pct": 7.7
     },
     {
       "appliance": "laundry",
-      "kwh": 22.5,
-      "pct": 6.5
+      "kwh": 21.2,
+      "pct": 6.1
     },
     {
       "appliance": "dishwasher",
-      "kwh": 15.3,
+      "kwh": 15.2,
       "pct": 4.4
     }
   ],
-  "generated_at": "2026-10-20T02:44:45.456305",
+  "generated_at": "2026-10-20T03:23:19.990919",
   "demo_note": "SYNTHETIC demo data (seed 7). Real analysis uses Green Button XML import."
 }

@@ -2,8 +2,8 @@
 
 import datetime as dt
 
-from wattwise.rates import (Rate180, Rate194, is_peak_hour, is_summer,
-                            FEDERAL_HOLIDAYS_2026)
+from wattwise.rates import (Rate180, Rate194, Rate194History, is_peak_hour,
+                            is_summer, FEDERAL_HOLIDAYS_2026)
 
 SUPPLY = 0.1392
 
@@ -74,3 +74,36 @@ def test_is_summer():
     assert is_summer(dt.date(2026, 9, 30))
     assert not is_summer(dt.date(2026, 10, 1))
     assert not is_summer(dt.date(2026, 5, 31))
+
+
+def test_history_loads_thirteen_periods():
+    h = Rate194History()
+    assert len(h.periods) == 13
+    for p in h.periods.values():
+        # peak + off-peak must reconstruct the period total
+        assert abs(p["peak_kwh"] + p["offpeak_kwh"] - p["kwh"]) < 1e-9
+
+
+def test_history_exact_rates_spot_check():
+    # Sep 2026 (bill date 2026-10-07), transcribed line-by-line.
+    h = Rate194History()
+    p = h.periods["2026-10-07"]
+    assert p["del_peak_rate"] == 0.2200
+    assert p["del_offpeak_rate"] == 0.1089
+    assert p["sup_peak_rate"] == 0.273846
+    assert p["sup_offpeak_rate"] == 0.116050
+    assert p["basic_usd"] == 16.80
+    assert p["taxes_usd"] == 9.18
+
+
+def test_history_reproduces_sep_2026_bill():
+    h = Rate194History()
+    modeled = h.bill_for("2026-10-07", 39.0, 281.0)
+    assert abs(modeled - 109.01) < 0.50
+
+
+def test_history_reproduces_all_bills_to_within_half_cent():
+    # Each bill's transcribed rates reproduce its total to within the
+    # utility's own per-line cent rounding.
+    h = Rate194History()
+    assert h.max_error() < 0.01

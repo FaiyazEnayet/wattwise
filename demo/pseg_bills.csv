@@ -1,8 +1,16 @@
-period_start,period_end,days,kwh,bill_usd,avg_daily_kwh,source
-2026-02-03,2026-03-02,27,,90.72,,
-2026-04-02,2026-05-03,31,,101.48,,
-2026-05-04,2026-06-01,28,,102.31,,
-2026-07-02,2026-08-04,33,619.39,185.67,18.77,weekly usage summary + bill email
-2026-08-04,2026-09-02,29,427.24,126.33,14.73,weekly usage summary + bill email
-2026-09-02,2026-10-02,30,320.25,109.01,10.67,weekly usage summary + bill email
-2026-10-02,2026-11-03,32,167.13,,,167.13 kWh measured through 2026-10-17 (partial period)
+period_start,period_end,bill_date,days,kwh,kwh_source,bill_usd,avg_daily_kwh,source
+2025-08-01,2025-09-03,2025-09-05,33,472,portal comparison,138.98,14.30,portal bill history + portal bill comparison
+2025-09-03,2025-10-02,2025-10-06,29,,,99.24,,portal bill history (before chart range; no kWh)
+2025-10-02,2025-11-04,2025-11-06,33,325,portal chart estimate,98.90,9.85,portal bill history + yearly energy chart
+2025-11-04,2025-12-02,2025-12-04,28,250,portal chart estimate,78.27,8.93,portal bill history + yearly energy chart
+2025-12-02,2026-01-05,2026-01-07,34,195,portal chart estimate,69.05,5.74,portal bill history + yearly energy chart
+2026-01-05,2026-02-03,2026-02-05,29,205,portal chart estimate,74.86,7.07,portal bill history + yearly energy chart
+2026-02-03,2026-03-03,2026-03-05,28,255,portal chart estimate,90.72,9.11,bill email + portal bill history + yearly energy chart
+2026-03-03,2026-04-02,2026-04-06,30,240,portal chart estimate,93.71,8.00,portal bill history + yearly energy chart
+2026-04-02,2026-05-04,2026-05-06,32,275,portal chart estimate,101.48,8.59,portal bill history + yearly energy chart
+2026-05-04,2026-06-02,2026-06-04,29,290,portal chart estimate,102.31,10.00,portal bill history + yearly energy chart
+2026-06-02,2026-07-02,2026-07-07,30,365,portal chart estimate,124.78,12.17,portal bill history + yearly energy chart
+2026-07-02,2026-08-04,2026-08-06,33,619.39,measured,185.67,18.77,weekly usage summary + bill email
+2026-08-04,2026-09-02,2026-09-04,29,427.24,measured,126.33,14.73,weekly usage summary + bill email
+2026-09-02,2026-10-02,2026-10-07,30,320.25,measured,109.01,10.68,weekly usage summary + bill email + portal monthly summary
+2026-10-02,2026-11-03,,32,167.13,partial (measured through 2026-10-17),,,weekly usage summary; period not yet billed

@@ -1,4 +1,10 @@
 period_start,period_end,category,dollars_usd
+2026-01-05,2026-02-02,laundry,17
+2026-01-05,2026-02-02,entertainment,10
+2026-01-05,2026-02-02,cooking,8
+2026-01-05,2026-02-02,refrigeration,6
+2026-01-05,2026-02-02,lighting,3
+2026-01-05,2026-02-02,taxes_fees,23
 2026-02-03,2026-03-02,entertainment,26
 2026-02-03,2026-03-02,refrigeration,21
 2026-02-03,2026-03-02,other,15
@@ -20,14 +26,15 @@ period_start,period_end,category,dollars_usd
 2026-05-04,2026-06-01,refrigeration,7
 2026-05-04,2026-06-01,lighting,5
 2026-05-04,2026-06-01,always_on,4
-2026-08-04,2026-09-01,cooling,35
+2026-08-04,2026-09-01,cooling,37
 2026-08-04,2026-09-01,always_on,18
-2026-08-04,2026-09-01,laundry,14
+2026-08-04,2026-09-01,laundry,12
 2026-08-04,2026-09-01,entertainment,9
-2026-08-04,2026-09-01,cooking,7
+2026-08-04,2026-09-01,cooking,8
 2026-08-04,2026-09-01,refrigeration,6
 2026-08-04,2026-09-01,other,5
 2026-08-04,2026-09-01,lighting,4
+2026-08-04,2026-09-01,taxes_fees,28
 2026-09-02,2026-10-01,cooling,18
 2026-09-02,2026-10-01,laundry,16
 2026-09-02,2026-10-01,always_on,12
@@ -36,3 +43,4 @@ period_start,period_end,category,dollars_usd
 2026-09-02,2026-10-01,other,7
 2026-09-02,2026-10-01,refrigeration,6
 2026-09-02,2026-10-01,lighting,4
+2026-09-02,2026-10-01,taxes_fees,27

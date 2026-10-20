@@ -2,64 +2,89 @@
   "period": "2026-09-02 to 2026-10-01 (30 days)",
   "measured_kwh": 320.25,
   "measured_bill_actual_usd": 109.01,
-  "measured_peak_cost_actual_usd": 17.0,
+  "measured_peak_cost_actual_usd": 19.0,
   "measured_avg_daily_kwh": 10.68,
-  "modeled_bill_tou_usd": 101.61,
+  "measured_peak_kwh": 39.0,
+  "measured_offpeak_kwh": 281.0,
+  "measured_energy_charges_usd": 82.0,
+  "measured_taxes_fees_usd": 27.0,
+  "modeled_bill_tou_usd": 97.49,
   "modeled_bill_flat_usd": 102.22,
   "cheaper_plan": "time-of-day (Rate 194)",
-  "plan_difference": 0.61,
-  "modeled_peak_kwh_pct": 17.7,
-  "modeled_peak_cost_pct": 32.1,
-  "opt_cost_before": 85.41,
-  "opt_cost_after": 84.29,
-  "opt_savings": 1.12,
-  "opt_savings_pct": 1.31,
-  "opt_shifted_kwh": 89.8,
+  "plan_difference": 4.73,
+  "modeled_peak_kwh_pct": 12.8,
+  "modeled_peak_cost_pct": 24.4,
+  "opt_cost_before": 81.29,
+  "opt_cost_after": 80.71,
+  "opt_savings": 0.58,
+  "opt_savings_pct": 0.71,
+  "opt_shifted_kwh": 89.5,
   "appliance_breakdown": [
     {
       "appliance": "baseload",
-      "kwh": 70.3,
+      "kwh": 70.4,
       "pct": 22.0
     },
     {
       "appliance": "hvac",
-      "kwh": 70.3,
+      "kwh": 70.4,
       "pct": 22.0
     },
     {
       "appliance": "laundry",
-      "kwh": 62.5,
-      "pct": 19.5
+      "kwh": 62.2,
+      "pct": 19.4
     },
     {
       "appliance": "lighting_plug",
-      "kwh": 54.7,
+      "kwh": 54.8,
       "pct": 17.1
     },
     {
       "appliance": "cooking",
-      "kwh": 35.1,
+      "kwh": 35.2,
       "pct": 11.0
     },
     {
       "appliance": "water_heater",
-      "kwh": 24.2,
-      "pct": 7.6
+      "kwh": 24.1,
+      "pct": 7.5
     },
     {
       "appliance": "dishwasher",
-      "kwh": 3.1,
+      "kwh": 3.3,
       "pct": 1.0
     }
   ],
   "history": {
-    "billed_periods": 6,
-    "bills_total_usd": 715.52,
+    "billed_periods": 14,
+    "bills_total_usd": 1493.31,
+    "measured_kwh_periods": 3,
+    "measured_kwh_total": 1366.88,
+    "chart_estimated_kwh_periods": 9,
+    "chart_estimated_kwh_total": 2400.0,
+    "first_period_start": "2025-08-01",
+    "last_period_end": "2026-11-03",
+    "anchor_peak_kwh": 39.0,
+    "anchor_offpeak_kwh": 281.0,
+    "anchor_energy_charges_usd": 82.0,
+    "anchor_taxes_fees_usd": 27.0,
     "full_kwh_periods": 3,
     "full_kwh_total": 1366.88,
-    "first_period_start": "2026-02-03",
-    "last_period_end": "2026-11-03"
+    "seasonal_max_kwh": 619.39,
+    "seasonal_max_period": "2026-07-02",
+    "seasonal_min_kwh": 195.0,
+    "seasonal_min_period": "2025-12-02",
+    "seasonal_ratio": 3.18
   },
-  "generated_at": "2026-10-20T02:44:45.605906",
-  "data_note": "MEASURED PSEG Long Island data. Period kWh totals, appliance mix and bills come from utility emails (weekly usage summaries, bill notices, appliance dollar estimates); see demo/pseg_bills.csv and demo/pseg_appliance_estimates.csv. Intraday hourly shape is modeled (seeded), not metered interval data, so modeled bills and optimizer savings are model outputs on a measured-calibrated profile."
+  "interval_validation": {
+    "periods_with_full_interval_coverage": 12,
+    "interval_kwh_vs_billed_kwh_max_abs_pct": 9.59,
+    "interval_kwh_vs_billed_kwh_mean_abs_pct": 2.91,
+    "sep2026_interval_kwh": 330.29,
+    "sep2026_interval_peak_kwh": 40.52,
+    "sep2026_billed_peak_kwh": 39.0
+  },
+  "generated_at": "2026-10-20T03:23:20.728505",
+  "data_note": "MEASURED PSEG Long Island data. Period kWh totals, appliance mix and bills come from utility emails (weekly usage summaries, bill notices, appliance dollar estimates) and the utility's customer portal (exact bill history, yearly energy chart, monthly time-of-day summary); see demo/pseg_bills.csv, demo/pseg_monthly.csv and demo/pseg_appliance_estimates.csv. The intraday hourly shape is measured: 15-minute smart-meter intervals (Sep 19 - Oct 1 use each date's own profile; earlier days the measured fall average shape). Only the appliance split within each hour is modeled, so optimizer savings are model outputs on a measured profile."
 }

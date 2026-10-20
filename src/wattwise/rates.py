@@ -15,7 +15,9 @@ used here ($0.1392/kWh) is the published figure effective October 1,
 2026; pass supply_rate to model any other month.
 """
 
+import csv
 import datetime as dt
+import os
 
 # Default power-supply rate: published PSEG LI figure, effective 2026-10-01.
 DEFAULT_SUPPLY_RATE = 0.1392  # $/kWh
@@ -123,3 +125,80 @@ class Rate194:
 
     def fixed_charge(self, days: int) -> float:
         return days * DAILY_SERVICE_CHARGE
+
+
+_DEMO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "..", "..", "demo")
+
+
+class Rate194History:
+    """Exact per-period Rate 194 pricing from measured PSEG LI bills.
+
+    Loads demo/pseg_rates_detailed.csv: the delivery and power-supply
+    rates (peak and off-peak), basic service and MFC charges, DER rate,
+    and the taxes/adjustments total, transcribed line-by-line from the
+    utility's own bill details for 13 billed periods (rates only, no
+    account or personal data).
+
+    This prices a historical period exactly: basic service + MFC +
+    energy (delivery + supply, peak and off-peak) + DER + the period's
+    actual taxes and adjustments. Use it to validate the tariff model
+    against utility reality instead of the published approximations.
+    """
+
+    name = "Rate 194 (time-of-day, measured history)"
+
+    def __init__(self, path=None):
+        self.path = path or os.path.join(_DEMO_DIR,
+                                         "pseg_rates_detailed.csv")
+        self.periods = {}
+        with open(self.path) as f:
+            for row in csv.DictReader(f):
+                self.periods[row["bill_date"]] = {
+                    k: float(row[k]) for k in (
+                        "days", "kwh", "peak_kwh", "offpeak_kwh",
+                        "basic_daily_rate", "basic_usd", "mfc_rate",
+                        "mfc_usd", "del_peak_rate", "del_offpeak_rate",
+                        "sup_peak_rate", "sup_offpeak_rate",
+                        "delivery_usd", "supply_usd", "der_rate",
+                        "der_usd", "other_taxes_usd", "taxes_usd",
+                        "bill_usd")
+                }
+                self.periods[row["bill_date"]]["period_start"] = row[
+                    "period_start"]
+                self.periods[row["bill_date"]]["period_end"] = row[
+                    "period_end"]
+
+    def bill_for(self, bill_date, peak_kwh, offpeak_kwh) -> float:
+        """Exact bill in dollars for a period's measured peak/off-peak kWh.
+
+        bill_date is the YYYY-MM-DD bill date string from the CSV.
+        """
+        p = self.periods[bill_date]
+        energy = (peak_kwh * (p["del_peak_rate"] + p["sup_peak_rate"])
+                  + offpeak_kwh * (p["del_offpeak_rate"]
+                                   + p["sup_offpeak_rate"]))
+        return (p["basic_usd"] + p["mfc_usd"] + energy + p["der_usd"]
+                + p["other_taxes_usd"])
+
+    def validation_report(self):
+        """Modeled vs actual bill for every stored period.
+
+        Returns a list of dicts with bill_date, modeled, actual, error.
+        """
+        rows = []
+        for bill_date, p in sorted(self.periods.items()):
+            modeled = self.bill_for(bill_date, p["peak_kwh"],
+                                    p["offpeak_kwh"])
+            rows.append({
+                "bill_date": bill_date,
+                "period": f"{p['period_start']} to {p['period_end']}",
+                "modeled": round(modeled, 2),
+                "actual": round(p["bill_usd"], 2),
+                "error": round(modeled - p["bill_usd"], 4),
+            })
+        return rows
+
+    def max_error(self) -> float:
+        """Worst absolute modeled-vs-actual error across all periods."""
+        return max(abs(r["error"]) for r in self.validation_report())

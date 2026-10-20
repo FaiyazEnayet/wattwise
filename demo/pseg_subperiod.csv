@@ -1,0 +1,13 @@
+subperiod_start,subperiod_end,days,kwh,avg_daily_kwh,source
+2026-07-02,2026-08-01,31,581.62,18.76,"weekly usage summary snapshots, differenced"
+2026-08-02,2026-08-03,2,37.77,18.88,"weekly usage summary snapshots, differenced"
+2026-08-04,2026-08-15,12,227.6,18.97,"weekly usage summary snapshots, differenced"
+2026-08-16,2026-08-22,7,91.85,13.12,"weekly usage summary snapshots, differenced"
+2026-08-23,2026-08-29,7,71.02,10.15,"weekly usage summary snapshots, differenced"
+2026-08-30,2026-09-01,3,36.77,12.26,"weekly usage summary snapshots, differenced"
+2026-09-02,2026-09-12,11,117.73,10.7,"weekly usage summary snapshots, differenced"
+2026-09-13,2026-09-19,7,84.85,12.12,"weekly usage summary snapshots, differenced"
+2026-09-20,2026-09-26,7,68.23,9.75,"weekly usage summary snapshots, differenced"
+2026-09-27,2026-10-01,5,49.44,9.89,"weekly usage summary snapshots, differenced"
+2026-10-02,2026-10-10,9,95.9,10.66,"weekly usage summary snapshots, differenced"
+2026-10-11,2026-10-17,7,71.23,10.18,"weekly usage summary snapshots, differenced"

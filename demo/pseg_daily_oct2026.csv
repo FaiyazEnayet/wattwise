@@ -1,0 +1,16 @@
+date,peak_demand_kw,avg_temp_f,daily_kwh,source
+2026-10-05,1.95,63,,portal demand chart estimate
+2026-10-06,1.78,54,,portal demand chart estimate
+2026-10-07,2.18,53.5,,portal-labeled peak demand
+2026-10-08,2.58,62,,portal demand chart estimate
+2026-10-09,3.72,60,,portal-labeled peak demand
+2026-10-10,2.22,57.5,,portal demand chart estimate
+2026-10-11,1.31,57,,portal demand chart estimate; portal reports the week ending Oct 11 totaled 71.22 kWh, down 4% vs the prior week
+2026-10-12,1.90,58,,portal demand chart estimate
+2026-10-13,1.65,62,,portal-labeled peak demand
+2026-10-14,2.45,70,,portal demand chart estimate; portal-labeled 70F average temperature
+2026-10-15,1.88,58.5,,portal demand chart estimate
+2026-10-16,1.80,62,,portal demand chart estimate
+2026-10-17,1.08,53,,portal-labeled peak demand
+2026-10-18,2.44,47,10.38,portal demand chart estimate; portal-labeled 47F average temperature; portal reports 10.38 kWh as the latest daily usage, down 22% vs the 90-day average
+2026-10-19,2.38,48,,portal demand chart estimate
