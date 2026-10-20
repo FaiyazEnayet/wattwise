@@ -20,3 +20,10 @@ jobs:
           if [ -f pyproject.toml ]; then pip install -e ".[dev]" 2>/dev/null || pip install -e .; fi
       - name: Run tests
         run: python -m pytest tests/ -q
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify browser decision arithmetic
+        run: node --test tests/test_dashboard_math.cjs
+      - name: Rebuild real data dashboard
+        run: python scripts/make_dashboard.py
