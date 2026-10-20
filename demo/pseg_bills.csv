@@ -1,0 +1,8 @@
+period_start,period_end,days,kwh,bill_usd,avg_daily_kwh,source
+2026-02-03,2026-03-02,27,,90.72,,
+2026-04-02,2026-05-03,31,,101.48,,
+2026-05-04,2026-06-01,28,,102.31,,
+2026-07-02,2026-08-04,33,619.39,185.67,18.77,weekly usage summary + bill email
+2026-08-04,2026-09-02,29,427.24,126.33,14.73,weekly usage summary + bill email
+2026-09-02,2026-10-02,30,320.25,109.01,10.67,weekly usage summary + bill email
+2026-10-02,2026-11-03,32,167.13,,,167.13 kWh measured through 2026-10-17 (partial period)

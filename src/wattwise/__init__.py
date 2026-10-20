@@ -10,6 +10,8 @@ residential rate structures.
 from .rates import Rate180, Rate194, is_peak_hour, is_summer
 from .greenbutton import read_greenbutton_xml
 from .profile import make_demo_profile, make_demo_weather
+from .measured import (load_billing_history, load_appliance_estimates,
+                       make_measured_profile, history_summary)
 from .appliances import APPLIANCES, FLEXIBLE_NAMES
 from .disagg import disaggregate, learn_shapes
 from .forecast import BillForecaster, forecast_month_bill
@@ -24,6 +26,8 @@ __all__ = [
     "Rate180", "Rate194", "is_peak_hour", "is_summer",
     "read_greenbutton_xml",
     "make_demo_profile", "make_demo_weather",
+    "load_billing_history", "load_appliance_estimates",
+    "make_measured_profile", "history_summary",
     "APPLIANCES", "FLEXIBLE_NAMES",
     "disaggregate", "learn_shapes",
     "BillForecaster", "forecast_month_bill",

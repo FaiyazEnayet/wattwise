@@ -1,0 +1,65 @@
+{
+  "period": "2026-09-02 to 2026-10-01 (30 days)",
+  "measured_kwh": 320.25,
+  "measured_bill_actual_usd": 109.01,
+  "measured_peak_cost_actual_usd": 17.0,
+  "measured_avg_daily_kwh": 10.68,
+  "modeled_bill_tou_usd": 101.61,
+  "modeled_bill_flat_usd": 102.22,
+  "cheaper_plan": "time-of-day (Rate 194)",
+  "plan_difference": 0.61,
+  "modeled_peak_kwh_pct": 17.7,
+  "modeled_peak_cost_pct": 32.1,
+  "opt_cost_before": 85.41,
+  "opt_cost_after": 84.29,
+  "opt_savings": 1.12,
+  "opt_savings_pct": 1.31,
+  "opt_shifted_kwh": 89.8,
+  "appliance_breakdown": [
+    {
+      "appliance": "baseload",
+      "kwh": 70.3,
+      "pct": 22.0
+    },
+    {
+      "appliance": "hvac",
+      "kwh": 70.3,
+      "pct": 22.0
+    },
+    {
+      "appliance": "laundry",
+      "kwh": 62.5,
+      "pct": 19.5
+    },
+    {
+      "appliance": "lighting_plug",
+      "kwh": 54.7,
+      "pct": 17.1
+    },
+    {
+      "appliance": "cooking",
+      "kwh": 35.1,
+      "pct": 11.0
+    },
+    {
+      "appliance": "water_heater",
+      "kwh": 24.2,
+      "pct": 7.6
+    },
+    {
+      "appliance": "dishwasher",
+      "kwh": 3.1,
+      "pct": 1.0
+    }
+  ],
+  "history": {
+    "billed_periods": 6,
+    "bills_total_usd": 715.52,
+    "full_kwh_periods": 3,
+    "full_kwh_total": 1366.88,
+    "first_period_start": "2026-02-03",
+    "last_period_end": "2026-11-03"
+  },
+  "generated_at": "2026-10-20T02:44:45.605906",
+  "data_note": "MEASURED PSEG Long Island data. Period kWh totals, appliance mix and bills come from utility emails (weekly usage summaries, bill notices, appliance dollar estimates); see demo/pseg_bills.csv and demo/pseg_appliance_estimates.csv. Intraday hourly shape is modeled (seeded), not metered interval data, so modeled bills and optimizer savings are model outputs on a measured-calibrated profile."
+}

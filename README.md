@@ -12,7 +12,7 @@ WattWise explores where a household uses electricity and which modeled changes r
 [![WattWise demo](docs/demo.gif?v=showcase-20261017b)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
 
-A lower bill can come from moving demand to cheaper hours without reducing total energy use. Compare the optimized load profile with the tariff schedule and appliance constraints before interpreting savings. Forecast bands and weather relationships provide context for uncertainty, while the seeded household profile keeps the example reproducible.
+A lower bill can come from moving demand to cheaper hours without reducing total energy use. Compare the optimized load profile with the tariff schedule and appliance constraints before interpreting savings. Forecast bands and weather relationships provide context for uncertainty, while the seeded household profile keeps the example reproducible. Real measured billing history for the same utility now ships in `demo/` and is reported under Measured data below.
 
 ## Explore
 
@@ -28,10 +28,30 @@ Hourly usage is priced under flat and time-of-use tariffs. A load-shifting optim
 
 | Scope | Recorded result or contract |
 | :--- | :--- |
-| Seeded 30-day demo, flat / TOU bill | $109.01 / $102.79 |
-| Flexible-load shifting saving | $5.18; 6.21% of flexible-load cost |
-| October forecast | $84.26; source band $73.75 to $94.76 |
+| Seeded 30-day demo, flat / TOU bill | $109.01 / $101.98 |
+| Flexible-load shifting saving | $5.26; 6.13% of flexible-load cost |
+| October forecast | $86.80; source band $79.13 to $94.47 |
+| Measured Sep 2026 period | 320.25 kWh; actual bill $109.01; $17 peak cost |
 | Scenario scope | Solar, EV and heat-pump figures are planning estimates |
+
+## Measured data
+
+The repo ships real measured billing history in `demo/pseg_bills.csv` and `demo/pseg_appliance_estimates.csv`, taken from PSEG Long Island utility emails with all identifying fields stripped. Six billed periods from Feb to Oct 2026 total $715.52; weekly usage summaries give measured kWh for the Jul (619.39), Aug (427.24) and Sep (320.25) 2026 periods.
+
+The September 2026 period is fully specified: 320.25 kWh, $109.01 on Time-of-Day Rate 194, $17 of it peak-hour cost. `demo/real_metrics.json` runs the full engine on a profile calibrated to that period, where period totals, the appliance mix and the bill are measured and only the intraday shape is modeled (seeded).
+
+What the measured data says, with no adjustment:
+
+| Measure | Value |
+| :--- | :--- |
+| Measured kWh, Sep 2026 | 320.25 (10.68 kWh/day) |
+| Actual bill (Rate 194) | $109.01 |
+| Modeled bill on the same usage | $101.61 TOU / $102.22 flat |
+| Modeled load-shifting saving | $1.12 (1.31%), 89.8 kWh shifted |
+| Real end-use mix (utility estimate) | baseload 22.0%, HVAC 22.0%, laundry 19.5%, lighting+plug 17.1%, cooking 11.0%, water heater 7.6%, dishwasher 1.0% |
+| Seeded demo end-use mix | water heater 33.9%, HVAC 28.6%, baseload 9.8%, lighting+plug 9.2%, laundry 7.2%, cooking 6.8%, dishwasher 4.4% |
+
+Two honest findings. First, the tariff model prices the measured month $7.40 below the actual bill, the gap expected from taxes, fees and supply-rate timing the model does not carry. Second, the measured end-use mix disagrees with the synthetic demo: in the real Sep period baseload, HVAC and laundry dominate, while the seeded profile put a third of all energy into water heating. The demo keeps its seeded profile as the reproducible example; the measured numbers are the ground truth to compare against.
 
 ## Updating this project
 
@@ -69,16 +89,16 @@ The shipped household and weather profiles are seeded. Forecast error and saving
 
 ![Tariff choice and flexible-load shifting](docs/results.png)
 
-The 6.21% shifting figure uses flexible-load cost as its denominator, not the entire household bill. Solar, EV and heat-pump scenarios are separate planning cases. Their values should not be summed into one promised saving.
+The 6.13% shifting figure uses flexible-load cost as its denominator, not the entire household bill. Solar, EV and heat-pump scenarios are separate planning cases. Their values should not be summed into one promised saving.
 
 ## Code and data
 
-`src/wattwise/` separates import, tariffs, forecasts, optimization and scenarios. `demo/metrics.json` holds computed demo results. `greenbutton.py` imports external interval data.
+`src/wattwise/` separates import, tariffs, forecasts, optimization and scenarios. `demo/metrics.json` holds computed demo results, `demo/real_metrics.json` holds the measured-period results, and `demo/pseg_bills.csv` plus `demo/pseg_appliance_estimates.csv` hold the measured history. `greenbutton.py` imports external interval data.
 
 
 ## Limitations
 
-- The provided household profile is seeded, not a metered home.
+- The demo household profile is seeded, not a metered home. The measured section uses real period totals and bills, but its intraday shape is still modeled; PSEG email data contains no interval readings.
 - Tariff supply charges change; scenario outputs depend on their stated assumptions.
 - The Green Button importer needs overlap-based interval allocation and an explicit household timezone before broader real-meter use.
 

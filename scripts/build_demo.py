@@ -19,8 +19,10 @@ from wattwise import (
     typical_weekday_profile, temperature_sensitivity, optimize_month,
     solar_scenario, ev_scenario, heat_pump_scenario,
     monthly_bill, compare_plans, peak_share, appliance_breakdown,
-    savings_waterfall,
+    savings_waterfall, make_measured_profile, history_summary,
 )
+from wattwise.measured import (ANCHOR_KWH, ANCHOR_BILL_USD,
+                               ANCHOR_PEAK_COST_USD)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEMO = os.path.join(HERE, "..", "demo")
@@ -140,6 +142,67 @@ def main():
     print(json.dumps({k: v for k, v in m.items()
                       if k not in ("waterfall", "appliance_breakdown")},
                      indent=2))
+
+    build_measured()
+
+
+def build_measured():
+    """Run the pipeline on the measured-anchored Sep 2026 profile and
+    write demo/real_metrics.json + demo/real_profile.csv.
+
+    Period totals (320.25 kWh), the appliance mix and the actual bill
+    ($109.01, Rate 194) are measured PSEG data; the intraday shape is
+    the modeled seeded shape, so modeled bill/optimizer figures below
+    are model outputs on a measured-calibrated profile, not meter
+    readings.
+    """
+    hourly, end_use, _temp = make_measured_profile()
+    hourly.to_frame().to_csv(os.path.join(DEMO, "real_profile.csv"),
+                             header=True)
+    rate194 = Rate194()
+    rm = {}
+    rm["period"] = "2026-09-02 to 2026-10-01 (30 days)"
+    rm["measured_kwh"] = ANCHOR_KWH
+    rm["measured_bill_actual_usd"] = ANCHOR_BILL_USD
+    rm["measured_peak_cost_actual_usd"] = ANCHOR_PEAK_COST_USD
+    rm["measured_avg_daily_kwh"] = round(ANCHOR_KWH / 30, 2)
+
+    # What wattwise's tariff model computes on the same usage.
+    rm["modeled_bill_tou_usd"] = monthly_bill(hourly, rate194)["total"]
+    rm["modeled_bill_flat_usd"] = monthly_bill(hourly, Rate180())["total"]
+    plans = compare_plans(hourly)
+    rm["cheaper_plan"] = plans["cheaper_plan"]
+    rm["plan_difference"] = plans["difference"]
+    ps = peak_share(hourly, rate194)
+    rm["modeled_peak_kwh_pct"] = ps["peak_kwh_pct"]
+    rm["modeled_peak_cost_pct"] = ps["peak_cost_pct"]
+
+    # Load shifting on the measured appliance mix.
+    opt = optimize_month(hourly, end_use, rate194)
+    rm["opt_cost_before"] = round(opt.cost_before, 2)
+    rm["opt_cost_after"] = round(opt.cost_after, 2)
+    rm["opt_savings"] = round(opt.savings, 2)
+    rm["opt_savings_pct"] = round(opt.savings_pct, 2)
+    rm["opt_shifted_kwh"] = round(opt.shifted_kwh, 1)
+
+    bd = appliance_breakdown(end_use)
+    rm["appliance_breakdown"] = [
+        {"appliance": i, "kwh": float(r["kwh"]), "pct": float(r["pct"])}
+        for i, r in bd.iterrows()
+    ]
+    rm["history"] = history_summary()
+    rm["generated_at"] = dt.datetime.now().isoformat()
+    rm["data_note"] = (
+        "MEASURED PSEG Long Island data. Period kWh totals, appliance "
+        "mix and bills come from utility emails (weekly usage "
+        "summaries, bill notices, appliance dollar estimates); see "
+        "demo/pseg_bills.csv and demo/pseg_appliance_estimates.csv. "
+        "Intraday hourly shape is modeled (seeded), not metered "
+        "interval data, so modeled bills and optimizer savings are "
+        "model outputs on a measured-calibrated profile.")
+    with open(os.path.join(DEMO, "real_metrics.json"), "w") as f:
+        json.dump(rm, f, indent=2)
+    print(json.dumps(rm, indent=2))
 
 
 if __name__ == "__main__":
