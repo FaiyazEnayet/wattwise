@@ -18,9 +18,7 @@ All model results and input fingerprints are frozen in `demo/analysis.json`. The
 
 ## Time and data quality
 
-The CSV uses local wall-clock timestamps without UTC offsets or repeated-hour flags. The analysis preserves those original values. America/New_York is the assumed service-area timezone for expected daily counts, not a claim that the original export has established a UTC mapping.
-
-The spring transition has four absent wall-clock slots, including 01:45, which does not match a simple conventional 02:00 through 02:45 skip. The autumn transition has 96 rows rather than a clearly represented 100-interval local day. Both transition dates are excluded from daily models pending utility confirmation. The partial final export day is also excluded from daily training, and remains visible in raw charts. Missing readings are not silently replaced by zero. Duplicate timestamps, negative imports without explicit import/export semantics, or nonfinite values fail with an actionable error.
+The CSV uses local wall-clock timestamps without UTC offsets or repeated-hour flags. The analysis preserves those original values
 
 Billing uses start-inclusive and end-exclusive periods. The previous reconciliation included the following period's first day. After correcting this and using detailed bill kWh instead of older chart reads, the 12 fully covered detailed periods are all within 0.5% of their billed energy. September 2 to October 2 contains 320.75 raw kWh against 320 billed kWh, and 39.08 raw peak-window kWh against 39 billed kWh. Remaining rounding or export differences are disclosed rather than rescaling the original measurements.
 
