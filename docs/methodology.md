@@ -4,7 +4,7 @@ WattWise is a household electricity decision tool built around original smart-me
 
 ## Household boundary
 
-The household is in Port Jefferson, New York, ZIP 11777. Cooling uses individual room AC units. Space heating is paid by the apartment building and is outside the electricity-saving boundary. There is no EV. Solar ownership has not been confirmed. No heating, EV or solar savings are silently added to the household results.
+The household is in Port Jefferson, New York, ZIP 11777. Cooling uses individual room AC units. No heating, EV or solar savings are silently added to the household results.
 
 ## Sources and precedence
 
@@ -76,7 +76,7 @@ The open bill is the recorded October 2 to November 3 period. The last partial d
 
 ## Intervention notebook
 
-Interventions, dates, cost and confounder notes are stored in local browser storage, with JSON import and export. No cloud synchronization or appliance-control permission is implied.
+Interventions, dates, cost and confounder notes are stored in local browser storage, with JSON import and export.
 
 The basic comparison needs at least 14 complete days in each 28-day window before and after the actual intervention date. It reports an unadjusted daily energy difference with a moving-week variation band. The separate matched comparison searches the previous 90 days for controls on the same weekday and within 5°F. It uses up to four nearest controls, requires at least three per treated day, and refuses an adjusted estimate unless at least 14 post-change days match.
 
@@ -94,11 +94,3 @@ node --test tests/test_dashboard_math.cjs
 
 For UI-only changes, `python scripts/make_dashboard.py --reuse-analysis` can reuse the frozen report. Rebuild without that flag after any data or analysis change. Weather fetching is an explicit optional step: `python scripts/fetch_household_weather.py`. No scheduled ingestion is silently enabled. The original `wattwise insights` command and legacy model modules remain available; their heuristic bands and seeded examples are distinct from this validated dashboard path.
 
-## What would strengthen the evidence next
-
-1. Confirm the utility export's DST labeling, acquire original timestamp-offset metadata, and replace exclusion with a validated UTC mapping.
-2. Add more seasons and independently logged interventions. One household and approximately one annual cycle cannot establish broad population generalization.
-3. Obtain plug-meter AC input and runtime measurements, plus optional indoor temperature, before optimizing comfort or claiming appliance-level savings.
-4. Archive tariff revisions and forecast-issuance weather snapshots; validate full bill adjustments before making enrollment or monthly-dollar promises.
-5. Measure multiday forecast errors on many historical origins and calibrate horizon-specific cumulative bands. Add a conservative recommendation gate based on lower-bound benefit and observed adherence.
-6. Use repeated, comfortable on/off or timing trials where practical, and disclose experiment exclusions before reading the outcome. There is no promise of publication or a universal portfolio score.
