@@ -235,14 +235,7 @@ def test_intervals_load_and_total():
 
 
 def test_interval_reconciliation_matches_billed_kwh():
-    """Interval sums per billing period reconcile to the billed kWh.
-
-    Full-coverage periods are within ~4% of billed (per-interval
-    rounding in the export reads slightly high); the Jan 2026 period
-    is the outlier at +9.6% against a chart-estimated 205 kWh. The
-    three exactly-measured periods (Jul/Aug/Sep 2026) are within
-    +2.2% to +3.1%.
-    """
+    """End-exclusive periods and line-item totals remove the extra-day bias."""
     rows = interval_reconciliation()
     full = [r for r in rows if r["billed_kwh"] and r["n_intervals"] >= 28 * 96]
     assert len(full) == 12
@@ -250,11 +243,8 @@ def test_interval_reconciliation_matches_billed_kwh():
     for r in full:
         err = 100 * (r["interval_kwh"] - r["billed_kwh"]) / r["billed_kwh"]
         worst = max(worst, abs(err))
-        if r["period_start"] == "2026-01-05":
-            assert err == pytest.approx(9.59, abs=0.05)
-        elif r["period_start"] == "2026-09-02":
-            assert err == pytest.approx(3.14, abs=0.05)
-    assert worst == pytest.approx(9.59, abs=0.05)
+        assert abs(err) < 0.5
+    assert worst < 0.5
 
 
 def test_interval_peak_reproduces_billed_peak():
@@ -270,9 +260,9 @@ def test_interval_peak_reproduces_billed_peak():
             continue
         assert r["interval_peak_kwh"] == pytest.approx(
             billed_peak[r["period_start"]], abs=6.0)
-    # Sep 2026 anchor: interval-derived 40.52 kWh vs billed 39.
+    # Sep 2026 anchor after correcting the extra-day boundary.
     sep = next(r for r in rows if r["period_start"] == "2026-09-02")
-    assert sep["interval_peak_kwh"] == pytest.approx(40.52, abs=0.1)
+    assert sep["interval_peak_kwh"] == pytest.approx(39.08, abs=0.1)
 
 
 def test_measured_profile_uses_real_interval_shape():
