@@ -14,7 +14,7 @@ WattWise studies my household's electricity use and asks which change is worth m
 
 [![Chronological measured electricity](docs/analysis-demo.gif)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
-The household uses individual room AC units. The apartment building pays for space heating, and there is no EV. Those boundaries prevent an optimizer from producing savings for appliances the household does not pay to run. Assumptions stay editable, model failures remain visible, and small or uncertain savings receive the same scrutiny as large ones.
+The household uses individual room AC units and has no EV. Assumptions stay editable, model failures remain visible, and small or uncertain savings receive the same scrutiny as large ones.
 
 ## Explore
 
@@ -85,7 +85,7 @@ Weather metadata records its provider and request. No live meter connection, dai
 - Flexible energy and removable watts are assumptions. Aggregate scenarios do not identify appliance jobs or prove comfort feasibility. The separate task scheduler does not reserve circuit capacity or operate devices.
 - Utility appliance costs are estimates. Weather associations and observational intervention comparisons do not establish causal appliance savings.
 - Forecast bands are empirical. One-step daily accuracy is not multiday accuracy; the open-bill envelope is not a calibrated monthly interval.
-- Building-paid heating is excluded. Solar, fuel-switching and EV economics require additional data and are not included in the decision results.
+- Solar, fuel-switching and EV economics require additional data and are not included in the decision results.
 
 ## License
 
