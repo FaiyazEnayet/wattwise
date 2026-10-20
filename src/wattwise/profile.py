@@ -151,8 +151,7 @@ def make_demo_profile(seed: int = 7, days: int = 90,
     kwh_30 = month.sum()
 
     def bill_for(scale):
-        e = (kwh_30 * scale) * (rate.delivery_rate(kwh_30 * scale, summer)
-                                + rate.supply_rate)
+        e = rate.energy_charge(kwh_30 * scale, summer)
         return e + rate.fixed_charge(30)
 
     # Solve scale by bisection (bill is monotonic in scale).

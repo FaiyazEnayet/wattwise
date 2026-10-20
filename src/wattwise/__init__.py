@@ -44,4 +44,4 @@ __all__ = [
     "seasonal_outlook", "cost_drivers", "detect_anomalies",
 ]
 
-__version__ = "0.1.0"
+__version__ = "1.2.0"

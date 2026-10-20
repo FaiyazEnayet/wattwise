@@ -76,8 +76,13 @@ class Rate180:
 
     def energy_charge(self, monthly_kwh: float, summer: bool) -> float:
         """Total energy charge for a month: delivery + 100% supply."""
-        delivery = self.delivery_rate(monthly_kwh, summer)
-        return monthly_kwh * (delivery + self.supply_rate)
+        if monthly_kwh < 0:
+            raise ValueError("Energy must be nonnegative")
+        # Incremental blocks: crossing 250 kWh does not reprice the first block.
+        low = min(monthly_kwh, 250.0)
+        high = max(monthly_kwh - 250.0, 0.0)
+        delivery = (low * .1021 + high * .1294) if summer else monthly_kwh * .1021
+        return delivery + monthly_kwh * self.supply_rate
 
     def marginal_price(self, when: dt.datetime, monthly_kwh: float = 0.0) -> float:
         """All-in $/kWh. Flat, so load shifting never pays under Rate 180."""

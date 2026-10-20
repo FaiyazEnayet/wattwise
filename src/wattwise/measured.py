@@ -252,17 +252,20 @@ def interval_reconciliation() -> list:
     and the interval-derived peak kWh (weekdays 3-7 PM excluding
     federal holidays, the Rate 194 window). One row per billing
     period in pseg_bills.csv."""
-    from .rates import FEDERAL_HOLIDAYS_2026
+    from .decision_analysis import peak_mask
     iv = load_intervals()
-    hol = pd.Index(FEDERAL_HOLIDAYS_2026)
-    dates = pd.Series(iv.index.date, index=iv.index)
-    is_peak = ((iv.index.weekday < 5)
-               & (iv.index.hour >= 15) & (iv.index.hour < 19)
-               & (~dates.isin(set(hol)).to_numpy()))
+    is_peak = peak_mask(iv.index)
     peak_kwh = iv.loc[is_peak, "kwh"]
     rows = []
-    for _, b in load_billing_history().iterrows():
-        end = b["period_end"] + pd.Timedelta(days=1)
+    bills = load_billing_history()
+    # The later line-item extraction supersedes earlier chart estimates.
+    detail_path = os.path.join(_DEMO_DIR, "pseg_rates_detailed.csv")
+    if os.path.exists(detail_path):
+        detail = pd.read_csv(detail_path, parse_dates=["period_start"])
+        exact = detail.set_index("period_start")["kwh"]
+        bills["kwh"] = bills["period_start"].map(exact).fillna(bills["kwh"])
+    for _, b in bills.iterrows():
+        end = b["period_end"]  # exclusive, as established by portal day counts
         seg = iv[(iv.index >= b["period_start"]) & (iv.index < end)]
         rows.append({
             "period_start": str(b["period_start"].date()),
