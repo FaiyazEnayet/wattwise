@@ -9,9 +9,9 @@
   "measured_energy_charges_usd": 82.0,
   "measured_taxes_fees_usd": 27.0,
   "modeled_bill_tou_usd": 97.49,
-  "modeled_bill_flat_usd": 102.22,
-  "cheaper_plan": "time-of-day (Rate 194)",
-  "plan_difference": 4.73,
+  "modeled_bill_flat_usd": 95.39,
+  "cheaper_plan": "flat (Rate 180)",
+  "plan_difference": 2.1,
   "modeled_peak_kwh_pct": 12.8,
   "modeled_peak_cost_pct": 24.4,
   "opt_cost_before": 81.29,
@@ -79,12 +79,12 @@
   },
   "interval_validation": {
     "periods_with_full_interval_coverage": 12,
-    "interval_kwh_vs_billed_kwh_max_abs_pct": 9.59,
-    "interval_kwh_vs_billed_kwh_mean_abs_pct": 2.91,
-    "sep2026_interval_kwh": 330.29,
-    "sep2026_interval_peak_kwh": 40.52,
+    "interval_kwh_vs_billed_kwh_max_abs_pct": 0.48,
+    "interval_kwh_vs_billed_kwh_mean_abs_pct": 0.21,
+    "sep2026_interval_kwh": 320.75,
+    "sep2026_interval_peak_kwh": 39.08,
     "sep2026_billed_peak_kwh": 39.0
   },
-  "generated_at": "2026-10-20T03:23:20.728505",
+  "generated_at": "2026-10-20T00:01:14.717037",
   "data_note": "MEASURED PSEG Long Island data. Period kWh totals, appliance mix and bills come from utility emails (weekly usage summaries, bill notices, appliance dollar estimates) and the utility's customer portal (exact bill history, yearly energy chart, monthly time-of-day summary); see demo/pseg_bills.csv, demo/pseg_monthly.csv and demo/pseg_appliance_estimates.csv. The intraday hourly shape is measured: 15-minute smart-meter intervals (Sep 19 - Oct 1 use each date's own profile; earlier days the measured fall average shape). Only the appliance split within each hour is modeled, so optimizer savings are model outputs on a measured profile."
 }
