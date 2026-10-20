@@ -59,7 +59,7 @@ def _layout(fig, title, height=380):
     return fig
 
 
-def main():
+def legacy_main():
     hourly, end_use, temp, m = _load()
     rate = Rate194()
     month = hourly.iloc[-30 * 24:]
@@ -218,7 +218,7 @@ def main():
     existing = list(fig.layout.annotations or [])
     fig.update_layout(
         title=dict(
-            text="wattwise — home energy analytics",
+            text="wattwise â€” home energy analytics",
             font=dict(size=22, color=TEXT), x=0.02, xanchor="left"),
         showlegend=True,
         legend=dict(orientation="h", yanchor="bottom", y=1.0, xanchor="right",
@@ -249,13 +249,47 @@ def main():
 
 
 def _portfolio_html(raw):
-    """Presentation-only transform of this run’s freshly calculated figures."""
+    """Presentation-only transform of this runâ€™s freshly calculated figures."""
     import sys
     from pathlib import Path
     root = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(root / "portfolio_ui"))
     from renderer import render_html
     return render_html(root, 'wattwise', raw)[0]
+
+def main():
+    """Build the real-data decision dashboard; retain the original demo fallback."""
+    from pathlib import Path
+    from wattwise.decision_analysis import build_report
+    root = Path(HERE).parent
+    if not (root / 'demo/pseg_interval_15min.csv').exists():
+        return legacy_main()
+    import argparse
+    from plotly.offline import get_plotlyjs
+    parser = argparse.ArgumentParser(description='Build the self-contained WattWise research dashboard')
+    parser.add_argument('--out', default=str(root / 'docs/dashboard.html'))
+    parser.add_argument('--reuse-analysis', action='store_true', help='Use an existing analysis.json after UI-only changes')
+    args = parser.parse_args()
+    report_path = root / 'demo/analysis.json'
+    if args.reuse_analysis and report_path.exists():
+        report = json.loads(report_path.read_text(encoding='utf-8'))
+    else:
+        report = build_report(root)
+        report_path.write_text(json.dumps(report, separators=(',', ':'), allow_nan=False), encoding='utf-8')
+    ui = root / 'dashboard_ui'
+    fonts = json.loads((root / 'portfolio_ui/fonts.json').read_text(encoding='utf-8'))
+    font_css = '\n'.join(fonts.get(f, '') for f in ['Sora', 'IBM Plex Mono'])
+    parts = {'__FONTS__': font_css, '__CSS__': (ui/'style.css').read_text(encoding='utf-8'),
+             '__PLOTLY__': get_plotlyjs(), '__DATA__': json.dumps(report, separators=(',', ':'), allow_nan=False).replace('<', '\\u003c'),
+             '__JS__': (ui/'decisions.js').read_text(encoding='utf-8')+'\n'+(ui/'app.js').read_text(encoding='utf-8')}
+    html = (ui/'index.html').read_text(encoding='utf-8')
+    for marker, value in parts.items():
+        html = html.replace(marker, value)
+    output = Path(args.out)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(html, encoding='utf-8')
+    print(f'Wrote {output} ({output.stat().st_size:,} bytes), with {len(report["daily"])} observed days')
+
 
 if __name__ == "__main__":
     main()
