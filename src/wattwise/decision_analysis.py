@@ -211,7 +211,7 @@ def weather_analysis(daily, weather_path):
             'residual': list(map(float, residual)),
             'alerts': [{'date': str(d.date()), 'actual': float(r['sum']),
                         'expected': float(r.expected), 'excess_kwh': float(r.residual)} for d,r in alerts.iterrows()],
-            'note': 'Cooling association above 65 F with weekday controls; not appliance metering or a causal AC saving. Heating is paid by the apartment building and excluded. Weather is ERA5 reanalysis at approximate town center.'}
+            'note': 'Cooling association above 65 F with weekday controls; not appliance metering or a causal AC saving. Weather is ERA5 reanalysis at approximate town center.'}
 
 
 def predict_daily(history, dates, method):
