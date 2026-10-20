@@ -1,10 +1,12 @@
 """Regression tests for accounting, temporal validation and decision analytics."""
 from pathlib import Path
+import json
 import numpy as np
 import pandas as pd
 import pytest
 from wattwise.decision_analysis import (read_intervals, interval_quality, reconcile_bills,
-    peak_mask, tariff_replay, shapley_bill_change, predict_daily, build_report)
+    peak_mask, tariff_replay, shapley_bill_change, predict_daily, build_report,
+    open_bill_forecast)
 from wattwise.rates import Rate180
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -81,3 +83,33 @@ def test_duplicate_timestamps_are_not_silently_double_counted(tmp_path):
     file.write_text('Start,kWh,kW\n01/01/2026 01:00:00 AM,1,4\n01/01/2026 01:00:00 AM,1,4\n')
     with pytest.raises(ValueError,match='Duplicate'):
         read_intervals(file)
+
+
+def test_open_bill_preserves_previous_projection_and_excludes_next_period():
+    iv = read_intervals(ROOT/'demo/pseg_interval_15min.csv')
+    daily, _ = interval_quality(iv)
+    forecast = json.loads((ROOT/'demo/analysis.json').read_text())['forecast']
+    history = pd.read_csv(ROOT/'demo/pseg_bills.csv', parse_dates=['period_start', 'period_end'])
+    result = open_bill_forecast(iv, daily, forecast, history)
+    assert result['observed_kwh'] == pytest.approx(183.68)
+    assert result['projected_kwh'] == pytest.approx(324.7196155600658)
+    assert result['display']['projected_subtotal_usd'] == '$94.67'
+    assert result['envelope_usd'] == pytest.approx([79.0453516559592, 104.25857787383438])
+    assert result['days_elapsed'] + result['days_remaining'] == 32
+    assert result['days_elapsed'] == 17.625
+    for i, day in enumerate(forecast['dates']):
+        if day >= result['period_end_exclusive']:
+            for field in ['prediction', 'lo', 'hi']:
+                forecast[field][i] = 1000000
+    assert open_bill_forecast(iv, daily, forecast, history) == result
+
+
+def test_open_bill_refuses_missing_forecast_coverage():
+    iv = read_intervals(ROOT/'demo/pseg_interval_15min.csv')
+    daily, _ = interval_quality(iv)
+    forecast = json.loads((ROOT/'demo/analysis.json').read_text())['forecast']
+    forecast['dates'] = forecast['dates'][:5]
+    history = pd.read_csv(ROOT/'demo/pseg_bills.csv', parse_dates=['period_start', 'period_end'])
+    result = open_bill_forecast(iv, daily, forecast, history)
+    assert not result['available']
+    assert 'cover' in result['reason']
