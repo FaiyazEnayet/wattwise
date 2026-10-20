@@ -22,6 +22,8 @@ from .optimize import optimize_load_shift, optimize_month
 from .whatif import solar_scenario, ev_scenario, heat_pump_scenario
 from .analyze import (monthly_bill, compare_plans, peak_share,
                       appliance_breakdown, savings_waterfall)
+from .insights import (forecast_next_bill, peak_drift, what_if,
+                       seasonal_outlook, cost_drivers, detect_anomalies)
 
 __all__ = [
     "Rate180", "Rate194", "is_peak_hour", "is_summer",
@@ -38,6 +40,8 @@ __all__ = [
     "solar_scenario", "ev_scenario", "heat_pump_scenario",
     "monthly_bill", "compare_plans", "peak_share",
     "appliance_breakdown", "savings_waterfall",
+    "forecast_next_bill", "peak_drift", "what_if",
+    "seasonal_outlook", "cost_drivers", "detect_anomalies",
 ]
 
 __version__ = "0.1.0"

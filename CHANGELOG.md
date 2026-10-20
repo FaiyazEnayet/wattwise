@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.4.0
+
+### Added
+- `wattwise.insights` module: decision support computed from the
+  measured data at exact measured rates. Bill forecast (trailing
+  30-day interval total x prior-year seasonal factor, priced at the
+  latest period's exact rates, +/-15% band); peak-hour drift alert
+  against the 3-period baseline (>15% threshold); what-if scenarios
+  (peak shift, cooling cut, total cut); seasonal outlook from last
+  year's same-month actuals; cost-driver ranking with 10%/20% cut
+  savings; weekday-aware anomaly detection on the interval data.
+- `wattwise insights` CLI (`wattwise.cli`, registered as a console
+  script) printing the six-section report for the latest period.
+- 8 regression tests in `tests/test_insights.py`; full suite 84/84.
+
+### Findings (latest run, measured data)
+- Forecast for the next 30 days: $99.13 (range $84.26-$113.99).
+- Peak share drifted +18.6% above baseline (12.2% vs 10.3%), a
+  $1.64 cost impact; flagged by the drift alert.
+- Top cost drivers: cooling ($18), laundry ($16), always-on ($12).
+
 ## v1.3.0
 
 ### Added

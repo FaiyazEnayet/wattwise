@@ -6,7 +6,7 @@
 
 # WattWise
 
-WattWise explores where a household uses electricity and which modeled changes reduce its bill. It combines load profiles, tariff calculations, forecasts, appliance estimates and constrained load shifting.
+WattWise explores where my household uses electricity and which changes reduce the bill. It is trained on my own real smart-meter data: 13 months, 37,976 fifteen-minute readings from my home, plus 14 exact utility bills. Load profiles, tariff calculations, forecasts, appliance estimates and constrained load shifting all run on those measurements.
 
 
 [![WattWise demo](docs/demo.gif?v=showcase-20261017b)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
@@ -56,6 +56,17 @@ What the measured data says, with no adjustment:
 | Seeded demo end-use mix | water heater 32.5%, HVAC 28.5%, lighting+plug 10.9%, baseload 9.9%, cooking 7.7%, laundry 6.1%, dishwasher 4.4% |
 
 Two honest findings. First, the tariff model built from the published rate approximations prices the measured month $11.52 below the actual bill, the gap expected from taxes, fees and supply-rate timing the model does not carry. With the exact rates from the bill detail pages (`Rate194History` in `wattwise.rates`) that gap disappears: the model now reproduces all 13 measured bills with a worst error of $0.0051, about half a cent of the utility's own per-line rounding. Second, the measured end-use mix disagrees with the synthetic demo: in the real Sep period baseload, HVAC and laundry dominate, while the seeded profile put a third of all energy into water heating. The demo keeps its seeded profile as the reproducible example; the measured numbers are the ground truth to compare against. A third finding came with the optimizer's move to the real interval shape: load-shifting savings fell from $1.12 on the seeded shape to $0.58, because the real household puts less energy in the weekday peak window than the seeded profile assumed.
+
+## Insights engine
+
+`wattwise insights` (module `wattwise.insights`) turns the measured data into decisions, using the exact per-period rates rather than the published approximations:
+
+- **Bill forecast**: the next 30-day bill projected from the trailing interval total scaled by last year's seasonal factor. Latest run: $99.13 (range $84.26 to $113.99) on 283.8 projected kWh.
+- **Peak-hour drift**: the latest period's peak share against the three-period baseline. Latest run: 12.2% vs a 10.3% baseline, flagged as drift (+18.6%), a $1.64 cost impact at current rates.
+- **What-if scenarios**: peak shifting, cooling cuts and total cuts repriced exactly. On the anchor period, shifting 20% of peak kWh off-peak saves $2.10; a 20% cooling cut saves $3.63; a 10% total cut saves $8.25.
+- **Seasonal outlook**: expected kWh and bill for upcoming months from last year's same-month actuals (December: ~195 kWh, ~$78.47 from the chart estimate).
+- **Cost drivers**: end uses ranked by dollars for the anchor period, cooling first ($18), then laundry ($16) and always-on ($12), with the savings from 10% and 20% cuts of each.
+- **Anomaly detection**: days more than 2 standard deviations above the rolling 14-day same-weekday mean, with the excess kWh and dollars (31 days flagged across the measured year; the largest single-day excess is 19.26 kWh on 2026-03-29).
 
 ## Updating this project
 
