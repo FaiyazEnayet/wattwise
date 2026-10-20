@@ -343,6 +343,74 @@ def load_shapes(iv, daily):
             'note':'Three descriptive k-means groups on normalized complete-day shapes. Cluster labels do not identify occupancy or appliances.'}
 
 
+def open_bill_forecast(iv, daily, forecast, billing_history, supply=DEFAULT_SUPPLY):
+    """Freeze the existing open-bill planning calculation for both UI views.
+
+    Period boundaries come from the declared unbilled history row. The band
+    sums daily bounds and is a conservative envelope, not a calibrated
+    monthly interval. Service accrues by fractional local calendar day.
+    """
+    as_of = iv.index[-1] + pd.Timedelta(minutes=15)
+    candidates = billing_history[
+        billing_history.bill_usd.isna()
+        & (billing_history.period_start <= iv.index[-1])
+        & (billing_history.period_end > iv.index[-1])]
+    if len(candidates) != 1 or not forecast.get('available'):
+        return {'available': False, 'reason': 'No unique declared open billing period or daily forecast is available.'}
+    row = candidates.iloc[0]
+    start, end = pd.Timestamp(row.period_start), pd.Timestamp(row.period_end)
+    observed = iv[(iv.index >= start) & (iv.index < end)]
+    last_day = iv.index[-1].normalize()
+    future_dates = pd.date_range(last_day + pd.Timedelta(days=1), end - pd.Timedelta(days=1))
+    positions = {pd.Timestamp(d): i for i, d in enumerate(forecast['dates'])}
+    if any(d not in positions for d in future_dates):
+        return {'available': False, 'reason': 'The stored daily forecast does not cover the declared open billing period.'}
+    peers = daily[(daily.index < last_day) & daily.usable & (daily.index.weekday == last_day.weekday())].tail(8)
+    if daily.loc[last_day, 'quality'] != 'complete' and peers.empty:
+        return {'available': False, 'reason': 'No complete comparable weekdays are available to finish the partial export day.'}
+    peer_values = sorted(peers['sum'].tolist())
+    partial = (max(0.0, peer_values[len(peer_values) // 2] - float(daily.loc[last_day, 'sum']))
+               if daily.loc[last_day, 'quality'] != 'complete' else 0.0)
+    indices = [positions[d] for d in future_dates]
+    sofar = float(observed.kwh.sum())
+    totals = [sofar + partial + sum(forecast[key][i] for i in indices)
+              for key in ['prediction', 'lo', 'hi']]
+    energy_cost, _ = tariff_replay(observed, '194', supply)
+    if sofar <= 0:
+        return {'available': False, 'reason': 'Positive observed energy is required for the declared price-mix assumption.'}
+    average_price = float(energy_cost.sum()) / sofar
+    days = (end - start).total_seconds() / 86400
+    elapsed = (as_of - start).total_seconds() / 86400
+    remaining = days - elapsed
+    service = days * .56
+    projected, lower, upper = [value * average_price + service for value in totals]
+    amount_sofar = float(energy_cost.sum()) + elapsed * .56
+    models = {m['model']: m for m in forecast['models']}
+    money = lambda value: f'${value:,.2f}'
+    return {
+        'available': True, 'period_start': str(start.date()), 'period_end_exclusive': str(end.date()),
+        'period_source': 'demo/pseg_bills.csv unbilled period', 'as_of': str(as_of),
+        'observed_kwh': sofar, 'modeled_subtotal_so_far_usd': amount_sofar,
+        'days_in_period': days, 'days_elapsed': elapsed, 'days_remaining': remaining,
+        'partial_day_completion_kwh': partial, 'projected_kwh': totals[0],
+        'projected_subtotal_usd': projected, 'envelope_kwh': totals[1:],
+        'envelope_usd': [lower, upper], 'band_type': 'conservative_sum_of_daily_bands',
+        'tariff_plan': '194', 'base_supply_usd_per_kwh': supply,
+        'average_energy_price_usd_per_kwh': average_price, 'service_usd_per_day': .56,
+        'weekly_holdout_mae': models['weekly_naive']['holdout_mae'],
+        'autoregression_holdout_mae': models['ridge_ar']['holdout_mae'],
+        'display': {
+            'projected_subtotal_usd': money(projected), 'projected_kwh': f'{totals[0]:,.1f}',
+            'observed_kwh': f'{sofar:,.2f}', 'modeled_subtotal_so_far_usd': money(amount_sofar),
+            'days_in_period': f'{days:g}', 'days_elapsed': f'{elapsed:.1f}', 'days_remaining': f'{remaining:.1f}',
+            'envelope_usd': f'{money(lower)}–{money(upper)}',
+            'envelope_kwh': f'{totals[1]:,.1f}–{totals[2]:,.1f}',
+            'weekly_holdout_mae': f'{models["weekly_naive"]["holdout_mae"]:.3f}',
+            'autoregression_holdout_mae': f'{models["ridge_ar"]["holdout_mae"]:.3f}',
+        },
+    }
+
+
 def build_report(root):
     root=Path(root)
     path=root/'demo/pseg_interval_15min.csv'
@@ -377,6 +445,8 @@ def build_report(root):
     # Compact interval payload preserves all data for browser date exploration.
     summer_days=daily[(daily.index.month.isin([6,7,8])) & daily.usable]
     winter_days=daily[(daily.index.month.isin([12,1,2])) & daily.usable]
+    forecast = forecast_analysis(daily)
+    history = pd.read_csv(root/'demo/pseg_bills.csv', parse_dates=['period_start', 'period_end'])
     return {'schema_version':1,'dataset_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
             'holidays':[d.strftime('%Y-%m-%d') for d in USFederalHolidayCalendar().holidays('2025-01-01','2030-12-31')],
             'household':{'town':'Port Jefferson NY 11777','ac':'individual room units',
@@ -385,7 +455,8 @@ def build_report(root):
             'tariffs':tariffs,'tariff_months':[str(d.date()) for d in pd.date_range('2025-10-01',periods=12,freq='MS')],
             'tariff_note':'Standardized 2026 delivery schedule replay on Oct 2025 to Sep 2026 readings with fixed September 2026 base PSC $0.139822/kWh. Energy and service subtotal only. Taxes, adjustments, eligibility and actual billing-cycle tier proration excluded. Not historical alternative bills.',
             'weather':weather_analysis(daily,root/'demo/household_weather.csv'),
-            'forecast':forecast_analysis(daily),'shapes':load_shapes(iv,daily),
+            'forecast':forecast,'open_bill_forecast':open_bill_forecast(iv,daily,forecast,history),
+            'shapes':load_shapes(iv,daily),
             'weekday_heatmap':weekday_heat.fillna(0).to_numpy().tolist(),
             'utility_appliance_estimates':est,
             'intervals':{'timestamps':[t.strftime('%Y-%m-%dT%H:%M') for t in iv.index],
