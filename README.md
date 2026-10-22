@@ -6,7 +6,7 @@
 ![Built with NumPy SciPy Plotly](https://img.shields.io/badge/built%20with-NumPy%20%2B%20SciPy%20%2B%20Plotly-355246)
 [![Interactive demo](https://img.shields.io/badge/demo-interactive-e4b66e)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
-<p align="center">**[Open interactive demo](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)** · [Methods](docs/methodology.md) · [Run locally](#run-locally)</p>
+<p align="center"><a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><b>Open interactive demo</b></a> · <a href="docs/methodology.md">Methods</a> · <a href="#run-locally">Run locally</a></p>
 
 # WattWise
 
