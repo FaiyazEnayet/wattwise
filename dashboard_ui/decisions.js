@@ -19,7 +19,7 @@ function matchIntervention(daily,weather,date){
  const weekday=d=>new Date(d+'T00:00:00Z').getUTCDay(),median=a=>{const b=[...a].sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2;};
  const matches=after.map(day=>{const candidates=before.filter(r=>weekday(r.date)===weekday(day.date)&&Math.abs(temps[r.date]-temps[day.date])<=5).sort((a,b)=>Math.abs(temps[a.date]-temps[day.date])-Math.abs(temps[b.date]-temps[day.date])).slice(0,4);return candidates.length>=3?{date:day.date,actual:day.kwh,expected:median(candidates.map(r=>r.kwh)),controls:candidates.map(r=>r.date)}:null;}).filter(Boolean);
  if(matches.length<14)return{ready:false,matched:matches.length,message:'Only '+matches.length+' post-change days have at least three earlier same-weekday controls within 5°F. Need 14 matched days; no adjusted saving is reported.'};
- const effects=matches.map(r=>r.expected-r.actual),mean=a=>sum(a)/a.length;let seed=11777;
+ const effects=matches.map(r=>r.expected-r.actual),mean=a=>sum(a)/a.length;let seed=7;
  const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;},samples=[];
  for(let n=0;n<600;n++){let draw=[];while(draw.length<effects.length){const a=Math.floor(rand()*(effects.length-6));draw.push(...effects.slice(a,a+7));}samples.push(mean(draw.slice(0,effects.length)));}samples.sort((a,b)=>a-b);
  return{ready:true,matched:matches.length,post:after.length,effect:mean(effects),low:samples[60],high:samples[540],matches,
