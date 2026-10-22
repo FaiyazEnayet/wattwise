@@ -1,0 +1,11 @@
+# CONTROLLED INJECTION FIXTURES for tests/test_public_privacy.py.
+# Each section holds exactly one forbidden identifier category so the test
+# can prove the scanner flags town, ZIP and coordinate exposure. This file
+# is deliberately skipped by scripts/privacy_scan.py and must never hold
+# real data.
+[town]
+Port Jefferson
+[zip]
+11777
+[coords]
+40.9465, -73.0693

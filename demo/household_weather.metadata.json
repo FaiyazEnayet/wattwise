@@ -1,16 +1,1 @@
-{
-  "source": "Open-Meteo ERA5 reanalysis; modeled weather, not a home sensor",
-  "location": "Port Jefferson NY 11777 approximate town center",
-  "request": {
-    "latitude": 40.9465,
-    "longitude": -73.0693,
-    "start_date": "2025-09-19",
-    "end_date": "2026-10-18",
-    "hourly": "temperature_2m,relative_humidity_2m",
-    "temperature_unit": "fahrenheit",
-    "timezone": "America/New_York",
-    "models": "era5"
-  },
-  "url": "https://archive-api.open-meteo.com/v1/archive?latitude=40.9465&longitude=-73.0693&start_date=2025-09-19&end_date=2026-10-18&hourly=temperature_2m%2Crelative_humidity_2m&temperature_unit=fahrenheit&timezone=America%2FNew_York&models=era5",
-  "rows": 9480
-}
+{"date_range":{"end":"2026-10-18","start":"2025-09-19"},"hourly_variables":["temperature_2m","relative_humidity_2m"],"location_policy":"Exact request parameters are private: withheld from public artifacts and never committed. The data owner reproduces the request from their private config.","models":"era5","rows":9480,"source":"Open-Meteo ERA5 reanalysis; modeled weather, not a home sensor","temperature_unit":"fahrenheit","timezone":"America/New_York"}

@@ -6,3 +6,6 @@ build/
 .venv/
 .pytest_cache/
 .DS_Store
+
+# Private local weather-request config (coordinates); never committed.
+demo/weather.private.json

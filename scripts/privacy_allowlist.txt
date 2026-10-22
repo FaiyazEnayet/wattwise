@@ -1,0 +1,13 @@
+# Privacy allowlist: exact "path :: literal" pairs deliberately retained.
+# Every entry needs a reason. Anything else matching a forbidden
+# category fails the scan.
+#
+# CHANGELOG.md: historical v1.2.0 release note kept for auditability;
+# history is never rewritten, and the entry documents what was fixed.
+CHANGELOG.md :: Port Jefferson ERA5 cooling analysis
+#
+# src/wattwise/decision_analysis.py: statistical seed for the moving-week
+# bootstrap behind the published slope_interval_80 band. Kept
+# byte-identically so the finding reproduces exactly; a bare integer
+# carries no locality on its own.
+src/wattwise/decision_analysis.py :: np.random.default_rng(11777)
