@@ -14,8 +14,6 @@ WattWise studies my household's electricity use and asks which change is worth m
 
 [![Chronological measured electricity](docs/analysis-demo.gif)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
 
-The household uses individual room AC units and has no EV. Assumptions stay editable, model failures remain visible, and small or uncertain savings receive the same scrutiny as large ones.
-
 ## Explore
 
 - **Meter history:** filter all recorded days, switch between energy and demand, and inspect original quarter-hour readings.
@@ -43,7 +41,7 @@ The household uses individual room AC units and has no EV. Assumptions stay edit
 | Final 28-day forecast MAE | Weekly persistence 1.564; selected autoregression 1.568 kWh/day |
 | Cooling conditional holdout MAE | 2.744 kWh/day versus 1.846 for the weekday baseline; the cooling model loses |
 
-The billing audit changed the interpretation of an apparent data-quality problem. An earlier reconciliation included the next billing period's first day and compared some periods against chart-read estimates. Correcting the boundary and using the later detailed extraction removes most of the discrepancy. The original readings are retained rather than rescaled to make the accounting agree.
+The billing audit changed the interpretation of an apparent data-quality problem. An earlier reconciliation included the next billing period's first day and compared some periods against chart-read estimates. Correcting the boundary and using the later detailed extraction removes most of the discrepancy. The original readings are retained rather than rescaled to make the accounting agree. The household uses individual room AC units and has no EV. Assumptions stay editable, model failures remain visible, and small or uncertain savings receive the same scrutiny as large ones.
 
 The forecast results impose useful restraint. Autoregression wins the earlier selection window, but weekly persistence is slightly better on the final holdout. The cooling fit finds a temperature association yet loses its predictive comparison. Neither result is hidden. The next useful improvement is stronger measurement and validation, rather than assuming a larger neural model would solve the problem.
 
