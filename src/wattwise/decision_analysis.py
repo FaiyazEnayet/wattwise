@@ -211,7 +211,7 @@ def weather_analysis(daily, weather_path):
             'residual': list(map(float, residual)),
             'alerts': [{'date': str(d.date()), 'actual': float(r['sum']),
                         'expected': float(r.expected), 'excess_kwh': float(r.residual)} for d,r in alerts.iterrows()],
-            'note': 'Cooling association above 65 F with weekday controls; not appliance metering or a causal AC saving. Weather is ERA5 reanalysis at approximate town center.'}
+            'note': 'Cooling association above 65 F with weekday controls; not appliance metering or a causal AC saving. Weather is ERA5 reanalysis for the Long Island area; modeled weather, not a home sensor.'}
 
 
 def predict_daily(history, dates, method):
@@ -449,7 +449,7 @@ def build_report(root):
     history = pd.read_csv(root/'demo/pseg_bills.csv', parse_dates=['period_start', 'period_end'])
     return {'schema_version':1,'dataset_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
             'holidays':[d.strftime('%Y-%m-%d') for d in USFederalHolidayCalendar().holidays('2025-01-01','2030-12-31')],
-            'household':{'town':'Port Jefferson NY 11777','ac':'individual room units',
+            'household':{'region':'Long Island, NY','ac':'individual room units',
                          'heating':'building paid; excluded','ev':False,'solar':'not confirmed'},
             'quality':quality,'daily':drows,'bills':bills,'attribution':attribution,
             'tariffs':tariffs,'tariff_months':[str(d.date()) for d in pd.date_range('2025-10-01',periods=12,freq='MS')],
