@@ -66,16 +66,16 @@ node --test tests/test_dashboard_math.cjs
 Open `docs/dashboard.html` directly. Its core analysis works offline. Optional explicit refreshes:
 
 ```sh
-python scripts/fetch_household_weather.py
+python scripts/fetch_household_weather.py --latitude <lat> --longitude <lon>  # coordinates are private
 python scripts/make_dashboard.py
 python scripts/make_research_assets.py
 ```
 
-Weather metadata records its provider and request. No live meter connection, daily scraping, cloud synchronization or appliance automation is enabled. The `--reuse-analysis` flag is for UI-only changes; omit it after changing data or calculations.
+Weather metadata records its provider and date range; exact request parameters stay private. No live meter connection, daily scraping, cloud synchronization or appliance automation is enabled. The `--reuse-analysis` flag is for UI-only changes; omit it after changing data or calculations.
 
 ## Data and reproducibility
 
-`demo/pseg_interval_15min.csv` stores interval kWh and average kW. `demo/pseg_rates_detailed.csv` supplies actual rates and accounting components. `demo/pseg_bills.csv` retains the longer history and earlier source estimates. `demo/pseg_appliance_estimates.csv` contains utility dollar estimates. `demo/household_weather.csv` contains modeled town weather, and `demo/analysis.json` records results and the input fingerprint. The [methodology](docs/methodology.md) defines source precedence, calendar boundaries, counterfactual assumptions and validation protocols.
+`demo/pseg_interval_15min.csv` stores interval kWh and average kW. `demo/pseg_rates_detailed.csv` supplies actual rates and accounting components. `demo/pseg_bills.csv` retains the longer history and earlier source estimates. `demo/pseg_appliance_estimates.csv` contains utility dollar estimates. `demo/household_weather.csv` contains modeled weather, and `demo/analysis.json` records results and the input fingerprint. The [methodology](docs/methodology.md) defines source precedence, calendar boundaries, counterfactual assumptions and validation protocols.
 
 ## Limitations
 

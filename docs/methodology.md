@@ -90,5 +90,5 @@ python -m pytest tests -q
 node --test tests/test_dashboard_math.cjs
 ```
 
-For UI-only changes, `python scripts/make_dashboard.py --reuse-analysis` can reuse the frozen report. Rebuild without that flag after any data or analysis change. Weather fetching is an explicit optional step: `python scripts/fetch_household_weather.py`. No scheduled ingestion is silently enabled. The original `wattwise insights` command and legacy model modules remain available; their heuristic bands and seeded examples are distinct from this validated dashboard path.
+For UI-only changes, `python scripts/make_dashboard.py --reuse-analysis` can reuse the frozen report. Rebuild without that flag after any data or analysis change. Weather fetching is an explicit optional step: `python scripts/fetch_household_weather.py --latitude <lat> --longitude <lon>` (coordinates are private; the script has no committed defaults). No scheduled ingestion is silently enabled. The original `wattwise insights` command and legacy model modules remain available; their heuristic bands and seeded examples are distinct from this validated dashboard path.
 
