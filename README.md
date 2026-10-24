@@ -1,18 +1,23 @@
 <p align="center"><img src="docs/readme-banner.svg?v=type-20261017b" alt="WattWise by Faiyaz Enayet" width="100%"></p>
 
-[![Tests](https://github.com/FaiyazEnayet/wattwise/actions/workflows/ci.yml/badge.svg)](https://github.com/FaiyazEnayet/wattwise/actions/workflows/ci.yml)
-[![License MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB)
-![Built with NumPy SciPy Plotly](https://img.shields.io/badge/built%20with-NumPy%20%2B%20SciPy%20%2B%20Plotly-355246)
-[![Interactive demo](https://img.shields.io/badge/demo-interactive-e4b66e)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
+<h1 align="center">WattWise</h1>
 
-<p align="center"><a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><b>Open interactive demo</b></a> · <a href="docs/methodology.md">Methods</a> · <a href="#run-locally">Run locally</a></p>
+<p align="center">
+  <a href="https://github.com/FaiyazEnayet/wattwise/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/FaiyazEnayet/wattwise/ci.yml?branch=main&amp;label=CI&amp;style=flat-square&amp;labelColor=24292f" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-e4b66e?style=flat-square&amp;labelColor=24292f" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&amp;labelColor=24292f" alt="Python 3.10 or newer">
+  <img src="https://img.shields.io/badge/built%20with-NumPy%20%2B%20SciPy%20%2B%20Plotly-355246?style=flat-square&amp;labelColor=24292f" alt="Built with NumPy, SciPy and Plotly">
+</p>
 
-# WattWise
+<p align="center">
+  <a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><img src="https://img.shields.io/badge/Open-Dashboard-e4b66e?style=for-the-badge&amp;labelColor=0b1915" alt="Open the interactive dashboard"></a>
+  <a href="docs/methodology.md"><img src="https://img.shields.io/badge/Explore-Methodology-9ac7aa?style=for-the-badge&amp;labelColor=0b1915" alt="Explore the methodology"></a>
+  <a href="#run-locally"><img src="https://img.shields.io/badge/Run-Locally-193128?style=for-the-badge&amp;labelColor=0b1915" alt="Run it locally"></a>
+</p>
 
 WattWise studies my household's electricity use and asks which change is worth making, and what evidence would show that it saved money. It uses 37,976 real fifteen-minute smart-meter readings, 13 detailed utility bills, an additional earlier bill and matched town-level weather. Original measurements, reconstructed accounting, forecasts and counterfactual scenarios remain distinct.
 
-[![Chronological measured electricity](docs/analysis-demo.gif)](https://faiyazenayet.github.io/wattwise/docs/dashboard.html)
+<p align="center"><a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><img src="docs/analysis-demo.gif" alt="Chronological measured electricity"></a></p>
 
 ## Explore
 
