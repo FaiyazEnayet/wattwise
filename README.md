@@ -10,8 +10,8 @@
 </p>
 
 <p align="center">
-  <a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><img src="https://img.shields.io/badge/Explore-Dashboard-e4b66e?style=for-the-badge&amp;labelColor=0b1915" alt="Explore the interactive dashboard"></a>
-  <a href="docs/methodology.md"><img src="https://img.shields.io/badge/Methodology-9ac7aa?style=for-the-badge&amp;labelColor=0b1915" alt="Read the methodology"></a>
+  <a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><img src="https://img.shields.io/badge/Open-Dashboard-e4b66e?style=for-the-badge&amp;labelColor=0b1915" alt="Open the interactive dashboard"></a>
+  <a href="docs/methodology.md"><img src="https://img.shields.io/badge/Explore-Methodology-9ac7aa?style=for-the-badge&amp;labelColor=0b1915" alt="Explore the methodology"></a>
   <a href="#run-locally"><img src="https://img.shields.io/badge/Run-Locally-193128?style=for-the-badge&amp;labelColor=0b1915" alt="Run it locally"></a>
 </p>
 
