@@ -17,6 +17,7 @@ used here ($0.1392/kWh) is the published figure effective October 1,
 
 import csv
 import datetime as dt
+from functools import lru_cache
 import os
 
 # Default power-supply rate: published PSEG LI figure, effective 2026-10-01.
@@ -41,17 +42,75 @@ FEDERAL_HOLIDAYS_2026 = frozenset(
     ]
 )
 
+def _nth_weekday(year: int, month: int, weekday: int, n: int) -> dt.date:
+    """The n-th `weekday` (Mon=0) of the month."""
+    first = dt.date(year, month, 1)
+    offset = (weekday - first.weekday()) % 7
+    return first + dt.timedelta(days=offset + 7 * (n - 1))
+
+
+def _last_weekday(year: int, month: int, weekday: int) -> dt.date:
+    if month == 12:
+        last = dt.date(year, 12, 31)
+    else:
+        last = dt.date(year, month + 1, 1) - dt.timedelta(days=1)
+    return last - dt.timedelta(days=(last.weekday() - weekday) % 7)
+
+
+def _observed(d: dt.date) -> dt.date:
+    """Federal observed date: Sat -> Fri before, Sun -> Mon after."""
+    if d.weekday() == 5:
+        return d - dt.timedelta(days=1)
+    if d.weekday() == 6:
+        return d + dt.timedelta(days=1)
+    return d
+
+
+@lru_cache(maxsize=None)
+def federal_holidays(year: int) -> frozenset:
+    """US federal holidays whose observed date falls in `year`.
+
+    Rule-based (weekday rules plus observed shifts for fixed-date
+    holidays), matching the OPM schedule. Reproduces the archived
+    FEDERAL_HOLIDAYS_2026 exactly for 2026; a fixed-date holiday whose
+    observed date lands in the previous year (only Jan 1 on a Saturday,
+    observed Dec 31) is counted in the year it is observed.
+    """
+    dates = {
+        _observed(dt.date(year, 1, 1)),          # New Year's Day
+        _nth_weekday(year, 1, 0, 3),             # MLK Day
+        _nth_weekday(year, 2, 0, 3),             # Washington's Birthday
+        _last_weekday(year, 5, 0),               # Memorial Day
+        _observed(dt.date(year, 6, 19)),         # Juneteenth
+        _observed(dt.date(year, 7, 4)),          # Independence Day
+        _nth_weekday(year, 9, 0, 1),             # Labor Day
+        _nth_weekday(year, 10, 0, 2),            # Columbus Day
+        _observed(dt.date(year, 11, 11)),        # Veterans Day
+        _nth_weekday(year, 11, 3, 4),            # Thanksgiving
+        _observed(dt.date(year, 12, 25)),        # Christmas
+    }
+    dates = {d for d in dates if d.year == year}
+    # Jan 1 of next year on a Saturday is observed Fri Dec 31 here.
+    if dt.date(year + 1, 1, 1).weekday() == 5:
+        dates.add(dt.date(year, 12, 31))
+    return frozenset(dates)
+
+
 
 def is_summer(d: dt.date) -> bool:
     """PSEG LI summer season is June through September."""
     return 6 <= d.month <= 9
 
 
-def is_peak_hour(timestamp: dt.datetime, holidays=frozenset()) -> bool:
+def is_peak_hour(timestamp: dt.datetime, holidays=None) -> bool:
     """True if a timestamp falls in Rate 194 peak hours.
 
     Peak = weekdays 3 PM-7 PM, excluding federal holidays.
+    `holidays=None` resolves the federal holidays of the timestamp's
+    own year (WW4); pass an explicit set to pin a calendar.
     """
+    if holidays is None:
+        holidays = federal_holidays(timestamp.year)
     d = timestamp.date()
     if d in holidays:
         return False
@@ -113,13 +172,18 @@ class Rate194:
     }
 
     def __init__(self, supply_rate: float = DEFAULT_SUPPLY_RATE,
-                 holidays=frozenset(FEDERAL_HOLIDAYS_2026)):
+                 holidays=None):
+        # holidays=None resolves the federal holidays of each
+        # timestamp's own year (WW4); an explicit set is still honored.
+        # The previous default pinned the 2026 set for every year.
         self.supply_rate = supply_rate
         self.holidays = holidays
 
     def energy_charge(self, kwh: float, when: dt.datetime) -> float:
         summer = is_summer(when.date())
-        peak = is_peak_hour(when, self.holidays)
+        holidays = (self.holidays if self.holidays is not None
+                    else federal_holidays(when.year))
+        peak = is_peak_hour(when, holidays)
         delivery = self._DELIVERY[(summer, peak)]
         supply = self._SUPPLY_MULT[(summer, peak)] * self.supply_rate
         return kwh * (delivery + supply)
