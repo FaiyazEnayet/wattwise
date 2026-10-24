@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/FaiyazEnayet/wattwise/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/FaiyazEnayet/wattwise/ci.yml?branch=main&amp;label=CI&amp;style=flat-square&amp;labelColor=24292f" alt="CI status"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-e4b66e?style=flat-square&amp;labelColor=24292f" alt="MIT license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-996515?style=flat-square&amp;labelColor=24292f" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&amp;labelColor=24292f" alt="Python 3.10 or newer">
   <img src="https://img.shields.io/badge/built%20with-NumPy%20%2B%20SciPy%20%2B%20Plotly-355246?style=flat-square&amp;labelColor=24292f" alt="Built with NumPy, SciPy and Plotly">
 </p>
