@@ -5,7 +5,9 @@ Observed bills, retrospective accounting, and counterfactuals remain separate.
 """
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
+from dataclasses import dataclass
 from itertools import permutations
 from pathlib import Path
 
@@ -16,6 +18,56 @@ from scipy.optimize import lsq_linear
 
 RATE_SOURCE = 'https://www.psegliny.com/aboutpseglongisland/ratesandtariffs/-/media/A0FDA80A6FE44A45973922422E86BD9E.ashx'
 DEFAULT_SUPPLY = 0.139822  # September 2026 published base PSC, scenario input
+
+
+@dataclass(frozen=True)
+class TariffSchedule:
+    """One archived, effective-dated version of the delivery tariff.
+
+    `effective_to=None` means the version is still in force. The price
+    formulas in `tariff_replay` currently implement the single verified
+    schedule below; a successor version is added here (never by editing
+    this entry) when a new schedule is published and verified.
+    """
+
+    version: str
+    effective_from: dt.date
+    effective_to: dt.date | None
+    plans: tuple
+    source: str
+
+
+TARIFF_SCHEDULES = (
+    TariffSchedule(
+        version="2026.1",
+        effective_from=dt.date(2026, 1, 1),
+        effective_to=None,
+        plans=("180", "194", "195"),
+        source=RATE_SOURCE,
+    ),
+)
+
+
+def schedule_in_force(on: dt.date, schedules=TARIFF_SCHEDULES) -> TariffSchedule:
+    """The archived schedule in force on `on`; LookupError if none."""
+    for s in schedules:
+        if s.effective_from <= on and (s.effective_to is None or on <= s.effective_to):
+            return s
+    raise LookupError(f"no tariff schedule in force on {on}")
+
+
+def monthly_supply_history(details: pd.DataFrame) -> dict:
+    """Blended supply price ($/kWh) per bill month, from actual bills.
+
+    Maps each bill's period-start month 'YYYY-MM' to supply_usd / kWh
+    for that bill: the household's realized supply price history, for
+    replay scenarios that should not use one declared scalar.
+    """
+    out = {}
+    for _, row in details.iterrows():
+        start = pd.Timestamp(row.period_start)
+        out[f"{start:%Y-%m}"] = float(row.supply_usd) / float(row.kwh)
+    return out
 
 
 def peak_mask(index):
@@ -104,15 +156,43 @@ def reconcile_bills(iv, details):
     return records
 
 
-def tariff_replay(iv, plan='194', supply=DEFAULT_SUPPLY):
+def tariff_replay(iv, plan='194', supply=DEFAULT_SUPPLY, schedule_version=None,
+                  supply_history=None):
     """2026 delivery schedule plus one declared PSC for the same historical load.
 
     This standardized scenario excludes taxes and adjustments and is not a
     reconstruction of historical alternative bills. Summer 180 blocks reset
     monthly in this scenario; actual billing-day proration needs the tariff.
+
+    WW4 versioning (additive; defaults keep the declared scenario above):
+    `schedule_version` pins an archived TariffSchedule and rejects any
+    interval outside its effective range, instead of silently pricing
+    other years with this schedule. `supply_history` (from
+    `monthly_supply_history`) prices each interval with its own month's
+    realized supply price and rejects months the history does not cover.
     """
     if not np.isfinite(supply) or supply < 0:
         raise ValueError('Supply rate must be finite and nonnegative')
+    if schedule_version is not None:
+        match = [s for s in TARIFF_SCHEDULES if s.version == schedule_version]
+        if not match:
+            raise ValueError(f'Unknown tariff schedule version {schedule_version}')
+        sched = match[0]
+        days = iv.index.date
+        first, last = days.min(), days.max()
+        if first < sched.effective_from or (
+            sched.effective_to is not None and last > sched.effective_to
+        ):
+            raise ValueError(
+                f'intervals {first}..{last} fall outside tariff schedule '
+                f'{sched.version} ({sched.effective_from}..{sched.effective_to})'
+            )
+    if supply_history is not None:
+        keys = [f'{ts:%Y-%m}' for ts in iv.index]
+        missing = sorted({k for k in keys if k not in supply_history})
+        if missing:
+            raise ValueError(f'no supply history for month(s) {missing}')
+        supply = np.array([supply_history[k] for k in keys])
     summer = iv.index.month.isin([6, 7, 8, 9])
     peak = peak_mask(iv.index)
     if plan == '194':
@@ -395,7 +475,7 @@ def open_bill_forecast(iv, daily, forecast, billing_history, supply=DEFAULT_SUPP
         'partial_day_completion_kwh': partial, 'projected_kwh': totals[0],
         'projected_subtotal_usd': projected, 'envelope_kwh': totals[1:],
         'envelope_usd': [lower, upper], 'band_type': 'conservative_sum_of_daily_bands',
-        'tariff_plan': '194', 'base_supply_usd_per_kwh': supply,
+        'tariff_plan': '194', 'tariff_version': TARIFF_SCHEDULES[0].version, 'base_supply_usd_per_kwh': supply,
         'average_energy_price_usd_per_kwh': average_price, 'service_usd_per_day': .56,
         'weekly_holdout_mae': models['weekly_naive']['holdout_mae'],
         'autoregression_holdout_mae': models['ridge_ar']['holdout_mae'],
@@ -424,7 +504,7 @@ def build_report(root):
         monthly=cost.resample('MS').sum()
         tariffs.append({'plan':name,'energy_usd':float(cost.sum()),'service_usd':365*.56,
                         'subtotal_usd':float(cost.sum()+365*.56),
-                        'monthly':[float(v) for v in monthly], 'supply':DEFAULT_SUPPLY})
+                        'monthly':[float(v) for v in monthly], 'tariff_version':TARIFF_SCHEDULES[0].version, 'supply':DEFAULT_SUPPLY})
     full=[r for r in bills if r['complete']]
     attribution=[{'from':a['period_start'],'to':b['period_start'],
                    'change':b['bill_usd']-a['bill_usd'],
