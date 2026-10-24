@@ -5,6 +5,9 @@
 ### Privacy
 - Household locality closure (P0): town, ZIP and weather-request coordinates removed from build_report output, the committed weather metadata, the dashboard header and generated docs/dashboard.html. The weather grid point is now a private parameter with no committed defaults; public metadata records provider, date range, variables and row count only. The moving-week bootstrap seed and all published numerical findings are unchanged; the weather CSV is byte-identical. Historical refs (including the v1.2.0 entry below) are retained for auditability.
 
+### Docs
+- README header rebuilt with a centered title, a badge row (CI, license, Python, stack) with uniform dark gray labels, and three action buttons in the dashboard's own palette (Open Dashboard, Methodology, Run Locally). The separate demo badge is dropped since the button carries it. Body text, evidence and limitations unchanged.
+
 ## v1.2.0
 
 ### Added
