@@ -49,7 +49,9 @@ WattWise studies my household's electricity use and asks which change is worth m
 
 The billing audit changed the interpretation of an apparent data-quality problem. An earlier reconciliation included the next billing period's first day and compared some periods against chart-read estimates. Correcting the boundary and using the later detailed extraction removes most of the discrepancy. The original readings are retained rather than rescaled to make the accounting agree. The household uses individual room AC units and has no EV. Assumptions stay editable, model failures remain visible, and small or uncertain savings receive the same scrutiny as large ones.
 
-The forecast results impose useful restraint. Autoregression wins the earlier selection window, but weekly persistence is slightly better on the final holdout. The cooling fit finds a temperature association yet loses its predictive comparison. Neither result is hidden. The next useful improvement is stronger measurement and validation, rather than assuming a larger neural model would solve the problem. A small neural forecaster has now been benchmarked on the same protocol: it won the selection window but lost the final holdout, so it stays a candidate and is not used.
+The forecast results impose useful restraint. Autoregression wins the earlier selection window, but weekly persistence is slightly better on the final holdout. The cooling fit finds a temperature association yet loses its predictive comparison. 
+
+A small neural forecaster has now been benchmarked on the same protocol: it won the selection window but lost the final holdout, so it stays a candidate and is not used.
 
 ## Architecture
 
