@@ -1,0 +1,568 @@
+{
+  "available": true,
+  "protocol": {
+    "origins": 84,
+    "selection_origins": 56,
+    "holdout_origins": 28,
+    "train_window_days": 240,
+    "features": [
+      "lag1",
+      "lag2",
+      "lag3",
+      "lag7",
+      "lag14",
+      "rolling7_mean",
+      "rolling28_mean",
+      "weekday_one_hot_7",
+      "cdd_lag1",
+      "cdd_rolling7_mean"
+    ],
+    "feature_rule": "Every feature value for a target day comes from data strictly before that day. Recursive steps beyond day 1 freeze the weather features at their origin-day values; no future weather is invented or assumed.",
+    "standardization": "training-window-only mean/std, per origin",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "ensemble": "mean of ridge, tree, neural paths",
+    "selection_rule": "Neural config selected on lowest one-step selection MAE over the first selection origins; holdout evaluated once after selection is frozen.",
+    "decision_rule": {
+      "win_margin": 0.05,
+      "max_interval_regression": 0.05,
+      "max_runtime_multiple": 10.0,
+      "win_horizons_required": 2,
+      "horizons": [
+        7,
+        14,
+        28
+      ]
+    },
+    "origin_dates": [
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-10",
+      "2026-08-11",
+      "2026-08-12",
+      "2026-08-13",
+      "2026-08-14",
+      "2026-08-15",
+      "2026-08-16",
+      "2026-08-17",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-23",
+      "2026-08-24",
+      "2026-08-25",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30",
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-06",
+      "2026-09-07",
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-12",
+      "2026-09-13",
+      "2026-09-14",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-20",
+      "2026-09-21",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+      "2026-10-05",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-10",
+      "2026-10-11",
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18"
+    ],
+    "holdout_dates": [
+      "2026-09-21",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+      "2026-10-05",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-10",
+      "2026-10-11",
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18"
+    ]
+  },
+  "neural_selection": [
+    {
+      "config": {
+        "hidden": 8,
+        "lr": 0.01,
+        "epochs": 300
+      },
+      "seed_selection_mae": [
+        3.5777058571063876,
+        2.7984186428373206,
+        3.30596414243704
+      ],
+      "selection_mae": 3.227362880793583
+    },
+    {
+      "config": {
+        "hidden": 16,
+        "lr": 0.01,
+        "epochs": 300
+      },
+      "seed_selection_mae": [
+        3.590383892211944,
+        3.5771918298752956,
+        3.854928908235002
+      ],
+      "selection_mae": 3.674168210107414
+    },
+    {
+      "config": {
+        "hidden": 32,
+        "lr": 0.01,
+        "epochs": 300
+      },
+      "seed_selection_mae": [
+        3.2767538931572227,
+        3.7789489295828997,
+        3.853871761794007
+      ],
+      "selection_mae": 3.636524861511376
+    }
+  ],
+  "chosen_config": {
+    "hidden": 8,
+    "lr": 0.01,
+    "epochs": 300
+  },
+  "one_step": [
+    {
+      "model": "weekly_naive",
+      "selection_mae": 3.627678571428571,
+      "holdout_mae": 1.5639285714285716,
+      "holdout_bias": 0.2725,
+      "holdout_wape": 0.15491014574784212,
+      "interval_score": 11.139999999999999
+    },
+    {
+      "model": "weekday_median",
+      "selection_mae": 4.6169642857142845,
+      "holdout_mae": 2.1080357142857142,
+      "holdout_bias": 1.5101785714285711,
+      "holdout_wape": 0.2088050091976794,
+      "interval_score": 12.973571428571429
+    },
+    {
+      "model": "ridge",
+      "selection_mae": 2.5569154292890275,
+      "holdout_mae": 1.8351606318755482,
+      "holdout_bias": 0.07021706125225077,
+      "holdout_wape": 0.18177620522327495,
+      "interval_score": 9.852545077475932
+    },
+    {
+      "model": "constrained_tree",
+      "selection_mae": 2.771644077275202,
+      "holdout_mae": 1.6009898599382733,
+      "holdout_bias": -0.049695024479267165,
+      "holdout_wape": 0.1585811379590762,
+      "interval_score": 8.887433733415628
+    },
+    {
+      "model": "neural",
+      "selection_mae": 2.8868233974425044,
+      "holdout_mae": 2.413648045587014,
+      "holdout_bias": 0.389507796810749,
+      "holdout_wape": 0.23907650090716148,
+      "interval_score": 10.953210378740787
+    },
+    {
+      "model": "ensemble",
+      "selection_mae": 2.366954012560027,
+      "holdout_mae": 1.89240317041958,
+      "holdout_bias": 0.13667661119457755,
+      "holdout_wape": 0.18744618923074943,
+      "interval_score": 8.704440492945684
+    }
+  ],
+  "horizons": [
+    {
+      "model": "weekly_naive",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 4.505454545454544,
+      "bias_kwh": -0.3818181818181827,
+      "wape": 0.0627167118017767,
+      "coverage_80": 1.0,
+      "interval_score": 51.36199999999999,
+      "regret_vs_best": 0.0,
+      "regret_vs_control": 0.0
+    },
+    {
+      "model": "weekly_naive",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 10.260666666666667,
+      "bias_kwh": -1.9766666666666595,
+      "wape": 0.07131174505506725,
+      "coverage_80": 0.8666666666666667,
+      "interval_score": 115.18666666666658,
+      "regret_vs_best": 0.0,
+      "regret_vs_control": 0.0
+    },
+    {
+      "model": "weekly_naive",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 35.60000000000008,
+      "bias_kwh": 35.60000000000008,
+      "wape": 0.125937455780388,
+      "coverage_80": 0.0,
+      "interval_score": 317.50399999999945,
+      "regret_vs_best": 34.35324300616645,
+      "regret_vs_control": 0.0
+    },
+    {
+      "model": "weekday_median",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 9.40681818181818,
+      "bias_kwh": 9.319999999999999,
+      "wape": 0.13094454708815262,
+      "coverage_80": 1.0,
+      "interval_score": 74.48199999999999,
+      "regret_vs_best": 4.9013636363636355,
+      "regret_vs_control": 4.9013636363636355
+    },
+    {
+      "model": "weekday_median",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 20.65533333333333,
+      "bias_kwh": 20.65533333333333,
+      "wape": 0.14355479156917345,
+      "coverage_80": 1.0,
+      "interval_score": 150.9285,
+      "regret_vs_best": 10.394666666666664,
+      "regret_vs_control": 10.394666666666664
+    },
+    {
+      "model": "weekday_median",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 61.236249999999984,
+      "bias_kwh": 61.236249999999984,
+      "wape": 0.21662745861044289,
+      "coverage_80": 1.0,
+      "interval_score": 206.45874999999992,
+      "regret_vs_best": 59.989493006166356,
+      "regret_vs_control": 25.636249999999905
+    },
+    {
+      "model": "ridge",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 7.371430820388192,
+      "bias_kwh": -5.498256265954468,
+      "wape": 0.10261160059764383,
+      "coverage_80": 0.5,
+      "interval_score": 61.48360547740402,
+      "regret_vs_best": 2.865976274933648,
+      "regret_vs_control": 2.865976274933648
+    },
+    {
+      "model": "ridge",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 16.562277256718254,
+      "bias_kwh": -11.640472051080858,
+      "wape": 0.11510800727006992,
+      "coverage_80": 0.6,
+      "interval_score": 145.3210651831857,
+      "regret_vs_best": 6.301610590051586,
+      "regret_vs_control": 6.301610590051586
+    },
+    {
+      "model": "ridge",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 1.2467569938336283,
+      "bias_kwh": 1.2467569938336283,
+      "wape": 0.00441048887021943,
+      "coverage_80": 0.0,
+      "interval_score": 734.4359860011992,
+      "regret_vs_best": 0.0,
+      "regret_vs_control": -34.35324300616645
+    },
+    {
+      "model": "constrained_tree",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 5.1220656911703735,
+      "bias_kwh": -2.986521222496873,
+      "wape": 0.07130004631985284,
+      "coverage_80": 0.9545454545454546,
+      "interval_score": 57.087194734994725,
+      "regret_vs_best": 0.6166111457158294,
+      "regret_vs_control": 0.6166111457158294
+    },
+    {
+      "model": "constrained_tree",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 12.242716701488124,
+      "bias_kwh": -7.5314080595128265,
+      "wape": 0.08508701437833166,
+      "coverage_80": 0.8,
+      "interval_score": 155.6584944464136,
+      "regret_vs_best": 1.982050034821457,
+      "regret_vs_control": 1.982050034821457
+    },
+    {
+      "model": "constrained_tree",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 7.950322580645093,
+      "bias_kwh": -7.950322580645093,
+      "wape": 0.028124814562915997,
+      "coverage_80": 0.0,
+      "interval_score": 532.394619745845,
+      "regret_vs_best": 6.7035655868114645,
+      "regret_vs_control": -27.649677419354987
+    },
+    {
+      "model": "neural",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 10.154907079066147,
+      "bias_kwh": -7.203990095178159,
+      "wape": 0.14135807480160917,
+      "coverage_80": 1.0,
+      "interval_score": 69.80359904997121,
+      "regret_vs_best": 5.649452533611603,
+      "regret_vs_control": 5.649452533611603
+    },
+    {
+      "model": "neural",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 21.926000449271843,
+      "bias_kwh": -12.616633898279426,
+      "wape": 0.1523859418604149,
+      "coverage_80": 1.0,
+      "interval_score": 165.40002240177407,
+      "regret_vs_best": 11.665333782605176,
+      "regret_vs_control": 11.665333782605176
+    },
+    {
+      "model": "neural",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 38.07570729933394,
+      "bias_kwh": -38.07570729933394,
+      "wape": 0.13469544113249593,
+      "coverage_80": 0.0,
+      "interval_score": 872.7560567712364,
+      "regret_vs_best": 36.828950305500314,
+      "regret_vs_control": 2.4757072993338625
+    },
+    {
+      "model": "ensemble",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 6.966752204048169,
+      "bias_kwh": -5.2295891945431645,
+      "wape": 0.09697840379201976,
+      "coverage_80": 0.8181818181818182,
+      "interval_score": 54.665422816851766,
+      "regret_vs_best": 2.461297658593625,
+      "regret_vs_control": 2.461297658593625
+    },
+    {
+      "model": "ensemble",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 15.950621520432811,
+      "bias_kwh": -10.596171336291034,
+      "wape": 0.11085699324296412,
+      "coverage_80": 1.0,
+      "interval_score": 134.57771899425967,
+      "regret_vs_best": 5.689954853766144,
+      "regret_vs_control": 5.689954853766144
+    },
+    {
+      "model": "ensemble",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 14.926424295381764,
+      "bias_kwh": -14.926424295381764,
+      "wape": 0.05280325560839737,
+      "coverage_80": 0.0,
+      "interval_score": 728.5449002621212,
+      "regret_vs_best": 13.679667301548136,
+      "regret_vs_control": -20.673575704618315
+    }
+  ],
+  "runtimes_seconds": {
+    "weekly_naive": 1.2804001309996238,
+    "weekday_median": 1.464032287000009,
+    "ridge": 12.98430745099904,
+    "constrained_tree": 14.444515892000709,
+    "neural": 53.27236695099964,
+    "ensemble": 80.70119029399939
+  },
+  "peak_rss_mb": {
+    "weekly_naive": 99.6328125,
+    "weekday_median": 99.6328125,
+    "ridge": 99.6328125,
+    "constrained_tree": 99.6328125,
+    "neural": 99.6328125,
+    "ensemble": 99.6328125
+  },
+  "decision": {
+    "decision": "RETAIN",
+    "winner": null,
+    "per_model": {
+      "weekday_median": {
+        "horizon_wins": 0,
+        "runtime_ok": true,
+        "mean_horizon_improvement": -0.9403507490679456,
+        "horizon_detail": {
+          "7": "no",
+          "14": "no",
+          "28": "no"
+        }
+      },
+      "ridge": {
+        "horizon_wins": 0,
+        "runtime_ok": false,
+        "mean_horizon_improvement": -0.09509533145559919,
+        "horizon_detail": {
+          "7": "no",
+          "14": "no",
+          "28": "no"
+        }
+      },
+      "constrained_tree": {
+        "horizon_wins": 0,
+        "runtime_ok": false,
+        "mean_horizon_improvement": 0.14888260315277918,
+        "horizon_detail": {
+          "7": "no",
+          "14": "no",
+          "28": "no"
+        }
+      },
+      "neural": {
+        "horizon_wins": 0,
+        "runtime_ok": false,
+        "mean_horizon_improvement": -0.8201181905022947,
+        "horizon_detail": {
+          "7": "no",
+          "14": "no",
+          "28": "no"
+        }
+      },
+      "ensemble": {
+        "horizon_wins": 0,
+        "runtime_ok": false,
+        "mean_horizon_improvement": -0.17337163578582723,
+        "horizon_detail": {
+          "7": "no",
+          "14": "no",
+          "28": "no"
+        }
+      }
+    }
+  },
+  "notes": [
+    "Tournament candidate only: the decision rule is applied mechanically; a REPLACE verdict does not promote a model automatically.",
+    "The neural candidate is re-evaluated here under the stricter no-leaked-weather rule. The FIXED-neural published one-step result stands for its own protocol and is not overturned.",
+    "Origins overlap and are not independent. The 28-day holdout admits only one complete 28-day forecast per model.",
+    "Runtime is wall seconds for fitting plus predicting over all origins; peak RSS is the process watermark after each candidate, monotonic rather than per-candidate isolated.",
+    "Selection origins are summer and holdout origins are fall in the full protocol; the comparison is fair because every candidate shares identical origins, while absolute MAE levels are season-mixed."
+  ]
+}
