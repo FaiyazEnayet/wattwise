@@ -1,0 +1,362 @@
+{
+  "available": true,
+  "protocol": {
+    "origins": 84,
+    "selection_origins": 56,
+    "holdout_origins": 28,
+    "train_window_days": 240,
+    "features": [
+      "lag1",
+      "lag2",
+      "lag3",
+      "lag7",
+      "lag14",
+      "rolling7_mean",
+      "rolling28_mean",
+      "weekday_one_hot_7",
+      "cdd_base65_realized"
+    ],
+    "standardization": "training-window-only mean/std, per origin",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "ensemble": "mean path across seeds",
+    "selection_rule": "lowest one-step selection MAE over the first selection origins; holdout evaluated once after selection is frozen",
+    "origin_dates": [
+      "2026-07-27",
+      "2026-07-28",
+      "2026-07-29",
+      "2026-07-30",
+      "2026-07-31",
+      "2026-08-01",
+      "2026-08-02",
+      "2026-08-03",
+      "2026-08-04",
+      "2026-08-05",
+      "2026-08-06",
+      "2026-08-07",
+      "2026-08-08",
+      "2026-08-09",
+      "2026-08-10",
+      "2026-08-11",
+      "2026-08-12",
+      "2026-08-13",
+      "2026-08-14",
+      "2026-08-15",
+      "2026-08-16",
+      "2026-08-17",
+      "2026-08-18",
+      "2026-08-19",
+      "2026-08-20",
+      "2026-08-21",
+      "2026-08-22",
+      "2026-08-23",
+      "2026-08-24",
+      "2026-08-25",
+      "2026-08-26",
+      "2026-08-27",
+      "2026-08-28",
+      "2026-08-29",
+      "2026-08-30",
+      "2026-08-31",
+      "2026-09-01",
+      "2026-09-02",
+      "2026-09-03",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-06",
+      "2026-09-07",
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-12",
+      "2026-09-13",
+      "2026-09-14",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-20",
+      "2026-09-21",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+      "2026-10-05",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-10",
+      "2026-10-11",
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18"
+    ],
+    "holdout_dates": [
+      "2026-09-21",
+      "2026-09-22",
+      "2026-09-23",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26",
+      "2026-09-27",
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-01",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04",
+      "2026-10-05",
+      "2026-10-06",
+      "2026-10-07",
+      "2026-10-08",
+      "2026-10-09",
+      "2026-10-10",
+      "2026-10-11",
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18"
+    ]
+  },
+  "selection": [
+    {
+      "config": {
+        "hidden": 8,
+        "lr": 0.01,
+        "epochs": 300
+      },
+      "seed_selection_mae": [
+        2.724970621690264,
+        2.9620454855993694,
+        2.5658348506728683
+      ],
+      "selection_mae": 2.750950319320834
+    },
+    {
+      "config": {
+        "hidden": 16,
+        "lr": 0.01,
+        "epochs": 300
+      },
+      "seed_selection_mae": [
+        3.4519268424204586,
+        3.5347921774077724,
+        2.966925868007847
+      ],
+      "selection_mae": 3.3178816292786926
+    },
+    {
+      "config": {
+        "hidden": 32,
+        "lr": 0.01,
+        "epochs": 300
+      },
+      "seed_selection_mae": [
+        4.23889757911008,
+        3.284582953616103,
+        3.1470623302461314
+      ],
+      "selection_mae": 3.556847620990771
+    }
+  ],
+  "chosen_config": {
+    "hidden": 8,
+    "lr": 0.01,
+    "epochs": 300
+  },
+  "one_step": [
+    {
+      "model": "weekly_naive",
+      "selection_mae": 3.627678571428571,
+      "holdout_mae": 1.5639285714285716,
+      "holdout_bias": 0.2725,
+      "holdout_wape": 0.15491014574784212
+    },
+    {
+      "model": "weekday_median",
+      "selection_mae": 4.6169642857142845,
+      "holdout_mae": 2.1080357142857142,
+      "holdout_bias": 1.5101785714285711,
+      "holdout_wape": 0.2088050091976794
+    },
+    {
+      "model": "ridge_ar",
+      "selection_mae": 2.5240809830114537,
+      "holdout_mae": 1.5678987400875783,
+      "holdout_bias": 0.580125472483474,
+      "holdout_wape": 0.15530339862194778
+    },
+    {
+      "model": "neural",
+      "selection_mae": 2.3574945048779887,
+      "holdout_mae": 2.090697050453997,
+      "holdout_bias": -0.8522148864853499,
+      "holdout_wape": 0.207087581055299
+    }
+  ],
+  "horizons": [
+    {
+      "model": "weekly_naive",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 4.505454545454544,
+      "bias_kwh": -0.3818181818181827,
+      "wape": 0.0627167118017767,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "weekly_naive",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 10.260666666666667,
+      "bias_kwh": -1.9766666666666595,
+      "wape": 0.07131174505506725,
+      "coverage_80": 0.8666666666666667
+    },
+    {
+      "model": "weekly_naive",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 35.60000000000008,
+      "bias_kwh": 35.60000000000008,
+      "wape": 0.125937455780388,
+      "coverage_80": 0.0
+    },
+    {
+      "model": "weekday_median",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 9.40681818181818,
+      "bias_kwh": 9.319999999999999,
+      "wape": 0.13094454708815262,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "weekday_median",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 20.65533333333333,
+      "bias_kwh": 20.65533333333333,
+      "wape": 0.14355479156917345,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "weekday_median",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 61.236249999999984,
+      "bias_kwh": 61.236249999999984,
+      "wape": 0.21662745861044289,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "ridge_ar",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 3.7032126312535096,
+      "bias_kwh": 3.034968061710572,
+      "wape": 0.051549364662737726,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "ridge_ar",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 8.131770597135416,
+      "bias_kwh": 6.889976483131865,
+      "wape": 0.056515894191658714,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "ridge_ar",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 39.337316012614,
+      "bias_kwh": 39.337316012614,
+      "wape": 0.13915846898476725,
+      "coverage_80": 1.0
+    },
+    {
+      "model": "neural",
+      "horizon": 7,
+      "holdout_origins": 22,
+      "calibration_origins": 50,
+      "mae_kwh": 10.872010868173568,
+      "bias_kwh": -10.872010868173568,
+      "wape": 0.15134028441435202,
+      "coverage_80": 0.09090909090909091
+    },
+    {
+      "model": "neural",
+      "horizon": 14,
+      "holdout_origins": 15,
+      "calibration_origins": 43,
+      "mae_kwh": 21.994244867767247,
+      "bias_kwh": -21.994244867767247,
+      "wape": 0.15286024131202708,
+      "coverage_80": 0.0
+    },
+    {
+      "model": "neural",
+      "horizon": 28,
+      "holdout_origins": 1,
+      "calibration_origins": 29,
+      "mae_kwh": 38.903356485588006,
+      "bias_kwh": -38.903356485588006,
+      "wape": 0.13762330722225843,
+      "coverage_80": 0.0
+    }
+  ],
+  "seed_spread": {
+    "holdout_one_step_mae_by_seed": [
+      2.0719381341305607,
+      2.172581287557516,
+      2.1946524257356974
+    ],
+    "holdout_one_step_mae_std": 0.05341137710300283,
+    "holdout_28day_mae_by_seed": [
+      29.25914862329074,
+      44.046773549363024,
+      43.40414728411022
+    ],
+    "holdout_28day_mae_std": 6.824529341407378
+  },
+  "notes": [
+    "Benchmark candidate only: reported win or lose, never promoted over the baselines automatically.",
+    "Degree-days use realized ERA5 reanalysis for the target day, not a forecast available in advance; multiday paths are conditional on realized weather throughout.",
+    "Origins overlap and are not independent. The 28-day holdout admits only one complete 28-day forecast per model.",
+    "Baselines are recomputed on identical origins from the same predict_daily code path as forecast_analysis."
+  ]
+}
