@@ -27,3 +27,5 @@ jobs:
         run: node --test tests/test_dashboard_math.cjs
       - name: Rebuild real data dashboard
         run: python scripts/make_dashboard.py
+      - name: Verify frozen outputs match a clean rebuild
+        run: python scripts/verify_frozen_outputs.py
