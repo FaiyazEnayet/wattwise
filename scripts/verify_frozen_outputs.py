@@ -6,9 +6,10 @@ of the worktree, then compares:
 - the frozen report: canonical JSON equality (the manifest's git_head
   build annotation is normalized out; see wattwise.decision_analysis);
 - the compiled dashboard: a normalized deterministic digest of the
-  HTML with the embedded report payload masked out, so template,
-  style, script and library changes are caught; the payload itself is
-  verified through the report comparison above.
+  HTML with the embedded report payload and the Plotly library bundle
+  masked out, so template, style and application-script changes are
+  caught; the payload itself is verified through the report
+  comparison above.
 
 With --strict, the dashboard comparison is a byte-for-byte comparison
 instead. Exit code 0 means the committed artifacts match a clean
@@ -44,18 +45,24 @@ import re
 _DATA_BLOCK = re.compile(
     r'(<script id="analysisData" type="application/json">).*?(</script>)',
     re.DOTALL)
+_PLOTLY_BLOCK = re.compile(
+    r'(<script>)/\*\*\n\* plotly\.js.*?(</script>)',
+    re.DOTALL)
 
 
 def _normalized_dashboard_digest(html_text):
-    """Digest of the compiled HTML with the report payload masked out.
+    """Digest of the compiled HTML with two volatile blocks masked out.
 
-    The payload itself is verified through demo/analysis.json (it is a
-    deterministic embedding of that file); masking it keeps this check
-    focused on the compiled structure: template, styles, scripts and
-    the Plotly bundle. Use --strict for a full byte comparison.
+    The report payload is verified through demo/analysis.json (the
+    dashboard embeds it deterministically), and the Plotly library
+    bundle is a third-party artifact whose bytes change with the
+    installed plotly version. Masking both keeps this check focused on
+    the compiled structure the project controls: template, styles and
+    application scripts. Use --strict for a full byte comparison.
     """
     masked, count = _DATA_BLOCK.subn(r"\1__REPORT_PAYLOAD__\2", html_text)
-    if count != 1:
+    masked, plotly_count = _PLOTLY_BLOCK.subn(r"\1__PLOTLY_BUNDLE__\2", masked)
+    if count != 1 or plotly_count != 1:
         return hashlib.sha256(html_text.encode("utf-8")).hexdigest()
     return hashlib.sha256(masked.encode("utf-8")).hexdigest()
 

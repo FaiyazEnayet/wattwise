@@ -571,11 +571,14 @@ def _git_head(root):
 def build_manifest(root):
     """Fingerprint every report input, the pricing assumptions and the code.
 
-    The returned dict includes its own `manifest_digest`. The git HEAD is
-    recorded as a build annotation only and is excluded from the digest:
-    the commit that records the frozen outputs always differs from the
-    commit the outputs were generated at, so including it would make the
-    digest change on every commit and useless as a staleness check.
+    The returned dict includes its own `manifest_digest`. The git HEAD
+    and the library environment are recorded as build annotations only
+    and are excluded from the digest: the digest identifies what the
+    report was built FROM (inputs, pricing, code), not the machine
+    state it was built ON. The commit that records the frozen outputs
+    always differs from the commit they were generated at, and library
+    patch versions drift between machines; either one would make the
+    digest useless as a staleness check.
     """
     root = Path(root)
     entries = []
@@ -613,9 +616,14 @@ def build_manifest(root):
 
 
 def manifest_digest(manifest):
-    """Digest over the canonical ordered manifest entries (digest excluded)."""
+    """Digest over the canonical ordered manifest entries.
+
+    Covers the inputs, the pricing assumptions and the code fingerprint.
+    Excludes the digest itself and the build annotations (git HEAD,
+    library environment), which describe the build, not its inputs.
+    """
     payload = {k: v for k, v in manifest.items()
-               if k not in ('manifest_digest', 'git_head')}
+               if k not in ('manifest_digest', 'git_head', 'environment')}
     return _sha256_bytes(canonical_json_bytes(payload))
 
 
@@ -632,9 +640,11 @@ def _canonicalize(value):
         number = float(value)
         if not np.isfinite(number):
             raise ValueError('Non-finite value cannot enter a frozen report')
-        # Canonical float rendering: 12 decimal places absorbs last-ulp
-        # library noise while staying far below claim precision.
-        number = round(number, 12)
+        # Canonical float rendering: 9 significant decimal digits.
+        # Cross-library floating point noise is relative (~1e-14), so a
+        # relative rendering absorbs it at any magnitude while staying
+        # far below claim precision (money is reported to the cent).
+        number = float(f'{number:.9g}')
         return 0.0 if number == 0 else number
     raise TypeError(f'Unserializable value in report: {type(value)!r}')
 
@@ -648,16 +658,21 @@ def canonical_json_bytes(obj):
 def frozen_report_bytes(report):
     """Canonical bytes for frozen-report comparison.
 
-    Identical to canonical_json_bytes except the manifest's git_head
-    build annotation is normalized out: the commit that records the
-    frozen report always differs from the commit it was generated at,
-    so that one field can never be part of a byte-equivalence check
-    (it is likewise excluded from the manifest digest).
+    Identical to canonical_json_bytes except the manifest's build
+    annotations (git_head, environment) are normalized out: the commit
+    that records the frozen report always differs from the commit it
+    was generated at, and library versions drift between machines, so
+    those fields can never be part of a byte-equivalence check (they
+    are likewise excluded from the manifest digest).
     """
+    if not isinstance(report, dict):
+        return canonical_json_bytes(report)
     normalized = copy.deepcopy(report)
     manifest = normalized.get('manifest')
-    if isinstance(manifest, dict) and 'git_head' in manifest:
-        manifest['git_head'] = '<build-annotation>'
+    if isinstance(manifest, dict):
+        for key in ('git_head', 'environment'):
+            if key in manifest:
+                manifest[key] = '<build-annotation>'
     return canonical_json_bytes(normalized)
 
 
