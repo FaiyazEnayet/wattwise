@@ -273,6 +273,14 @@ def main():
     report_path = root / 'demo/analysis.json'
     if args.reuse_analysis and report_path.exists():
         report = json.loads(report_path.read_text(encoding='utf-8'))
+        # No-recompute assertion (P1): the frozen report may only be
+        # reused when its evidence manifest still matches the current
+        # inputs, pricing and analysis code.
+        from wattwise.decision_analysis import ManifestMismatch, verify_reuse
+        try:
+            verify_reuse(root, report)
+        except ManifestMismatch as exc:
+            parser.error(f'--reuse-analysis refused: {exc}')
     else:
         report = build_report(root)
         report_path.write_text(json.dumps(report, separators=(',', ':'), allow_nan=False), encoding='utf-8')

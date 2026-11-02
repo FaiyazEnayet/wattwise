@@ -5,14 +5,20 @@ Observed bills, retrospective accounting, and counterfactuals remain separate.
 """
 from __future__ import annotations
 
+import copy
 import datetime as dt
 import hashlib
+import json
+import platform
+import subprocess
+import sys
 from dataclasses import dataclass
 from itertools import permutations
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import scipy
 from pandas.tseries.holiday import USFederalHolidayCalendar
 from scipy.optimize import lsq_linear
 
@@ -491,6 +497,227 @@ def open_bill_forecast(iv, daily, forecast, billing_history, supply=DEFAULT_SUPP
     }
 
 
+# ---------------------------------------------------------------------------
+# Reproducible evidence manifest (P1)
+#
+# The frozen report carries a manifest fingerprinting every input it was
+# built from, the pricing assumptions and the analysis code itself. The
+# manifest digest is the reuse gate: scripts/make_dashboard.py refuses
+# --reuse-analysis when the stored digest no longer matches the current
+# inputs and code, and scripts/verify_frozen_outputs.py rebuilds the
+# report from a clean copy of the worktree and compares canonical JSON.
+# Only repository-relative paths are recorded; no absolute paths, no
+# coordinates, nothing private.
+
+MANIFEST_SCHEMA = 'wattwise-report-manifest/1'
+
+# (role, path under demo/, parser schema, timestamp convention)
+REPORT_INPUTS = (
+    ('intervals', 'pseg_interval_15min.csv',
+     'pseg-interval-csv: Start,kWh,kW with %m/%d/%Y %I:%M:%S %p timestamps',
+     'naive wall time, America/New_York assumed; CSV carries no UTC offset'),
+    ('bill_details', 'pseg_rates_detailed.csv',
+     'pseg-bill-details-csv: one row per billed period with line-item rates',
+     'period_start/period_end are local calendar dates; boundaries [start, end)'),
+    ('billing_history', 'pseg_bills.csv',
+     'pseg-bills-csv: period_start,period_end,bill_usd; an unbilled row has bill_usd empty',
+     'period_start/period_end are local calendar dates; boundaries [start, end)'),
+    ('appliance_estimates', 'pseg_appliance_estimates.csv',
+     'pseg-appliance-estimates-csv: category-level utility estimates',
+     'monthly aggregates; no interval timestamps'),
+    ('weather', 'household_weather.csv',
+     'open-meteo-era5-hourly-csv: timestamp,temperature_f',
+     'hourly local time, America/New_York (provider metadata: demo/household_weather.metadata.json)'),
+)
+
+# Changing any of these files changes the analysis rules, so the report's
+# provenance fingerprint must change with them.
+CODE_PATHS = ('src/wattwise/decision_analysis.py',)
+
+
+class ManifestMismatch(RuntimeError):
+    """The stored report does not match the current inputs or code."""
+
+
+def _sha256_bytes(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def code_fingerprint(paths=None):
+    """SHA-256 over the analysis source files, in a fixed order."""
+    if paths is None:
+        paths = [Path(__file__).resolve().parents[2] / rel for rel in CODE_PATHS]
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(Path(path).read_bytes())
+    return digest.hexdigest()
+
+
+def _csv_data_rows(path):
+    """Data-row count of a CSV with a header row (explicit row counts)."""
+    with open(path, 'rb') as fh:
+        return max(sum(1 for _ in fh) - 1, 0)
+
+
+def _git_head(root):
+    try:
+        out = subprocess.run(['git', '-C', str(root), 'rev-parse', 'HEAD'],
+                             capture_output=True, text=True, timeout=10)
+        return out.stdout.strip() if out.returncode == 0 else None
+    except Exception:
+        return None
+
+
+def build_manifest(root):
+    """Fingerprint every report input, the pricing assumptions and the code.
+
+    The returned dict includes its own `manifest_digest`. The git HEAD
+    and the library environment are recorded as build annotations only
+    and are excluded from the digest: the digest identifies what the
+    report was built FROM (inputs, pricing, code), not the machine
+    state it was built ON. The commit that records the frozen outputs
+    always differs from the commit they were generated at, and library
+    patch versions drift between machines; either one would make the
+    digest useless as a staleness check.
+    """
+    root = Path(root)
+    entries = []
+    for role, name, schema, timestamps in REPORT_INPUTS:
+        path = root / 'demo' / name
+        if not path.exists():
+            entries.append({'role': role, 'path': f'demo/{name}', 'present': False})
+            continue
+        raw = path.read_bytes()
+        entries.append({
+            'role': role, 'path': f'demo/{name}', 'present': True,
+            'sha256': _sha256_bytes(raw), 'bytes': len(raw),
+            'rows': _csv_data_rows(path), 'parser_schema': schema,
+            'timestamp_convention': timestamps,
+        })
+    manifest = {
+        'schema': MANIFEST_SCHEMA,
+        'inputs': entries,
+        'pricing': {
+            'supply_usd_per_kwh': DEFAULT_SUPPLY,
+            'tariff_schedule_version': TARIFF_SCHEDULES[0].version,
+            'tariff_source': RATE_SOURCE,
+            'plans': list(TARIFF_SCHEDULES[0].plans),
+        },
+        'code': {'sha256': code_fingerprint(), 'files': list(CODE_PATHS)},
+        'environment': {
+            'python': platform.python_version(),
+            'pandas': pd.__version__, 'numpy': np.__version__,
+            'scipy': scipy.__version__,
+        },
+    }
+    manifest['manifest_digest'] = manifest_digest(manifest)
+    manifest['git_head'] = _git_head(root)
+    return manifest
+
+
+def manifest_digest(manifest):
+    """Digest over the canonical ordered manifest entries.
+
+    Covers the inputs, the pricing assumptions and the code fingerprint.
+    Excludes the digest itself and the build annotations (git HEAD,
+    library environment), which describe the build, not its inputs.
+    """
+    payload = {k: v for k, v in manifest.items()
+               if k not in ('manifest_digest', 'git_head', 'environment')}
+    return _sha256_bytes(canonical_json_bytes(payload))
+
+
+def _canonicalize(value):
+    if isinstance(value, dict):
+        return {str(k): _canonicalize(value[k]) for k in sorted(value, key=str)}
+    if isinstance(value, (list, tuple)):
+        return [_canonicalize(v) for v in value]
+    if isinstance(value, (bool, str)) or value is None:
+        return value
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)):
+        number = float(value)
+        if not np.isfinite(number):
+            raise ValueError('Non-finite value cannot enter a frozen report')
+        # Canonical float rendering: 9 significant decimal digits.
+        # Cross-library floating point noise is relative (~1e-14), so a
+        # relative rendering absorbs it at any magnitude while staying
+        # far below claim precision (money is reported to the cent).
+        number = float(f'{number:.9g}')
+        return 0.0 if number == 0 else number
+    raise TypeError(f'Unserializable value in report: {type(value)!r}')
+
+
+def canonical_json_bytes(obj):
+    """Deterministic JSON bytes: sorted keys, canonical floats, no NaN/Inf."""
+    return json.dumps(_canonicalize(obj), sort_keys=True,
+                      separators=(',', ':'), allow_nan=False).encode('utf-8')
+
+
+def frozen_report_bytes(report):
+    """Canonical bytes for frozen-report comparison.
+
+    Identical to canonical_json_bytes except the manifest's build
+    annotations (git_head, environment) are normalized out: the commit
+    that records the frozen report always differs from the commit it
+    was generated at, and library versions drift between machines, so
+    those fields can never be part of a byte-equivalence check (they
+    are likewise excluded from the manifest digest).
+    """
+    if not isinstance(report, dict):
+        return canonical_json_bytes(report)
+    normalized = copy.deepcopy(report)
+    manifest = normalized.get('manifest')
+    if isinstance(manifest, dict):
+        for key in ('git_head', 'environment'):
+            if key in manifest:
+                manifest[key] = '<build-annotation>'
+    return canonical_json_bytes(normalized)
+
+
+def validate_report_contract(report):
+    """Data contract for a frozen report; raises ValueError on violation."""
+    required = {'schema_version', 'dataset_sha256', 'quality', 'daily', 'bills',
+                'tariffs', 'weather', 'forecast', 'summary', 'manifest'}
+    missing = required - set(report)
+    if missing:
+        raise ValueError(f'Report is missing required keys: {sorted(missing)}')
+    canonical_json_bytes(report)  # rejects non-finite or unserializable values
+    manifest = report['manifest']
+    if manifest.get('schema') != MANIFEST_SCHEMA:
+        raise ValueError('Report manifest has an unknown schema')
+    if manifest.get('manifest_digest') != manifest_digest(manifest):
+        raise ValueError('Report manifest digest does not match its entries')
+    entries = {e['role']: e for e in manifest['inputs']}
+    if entries['intervals'].get('rows') != report['quality']['rows']:
+        raise ValueError('Interval row count disagrees with the quality block')
+    if entries['bill_details'].get('rows') != len(report['bills']):
+        raise ValueError('Bill row count disagrees with the bills block')
+    if len(report['daily']) != report['quality']['days']:
+        raise ValueError('Daily row count disagrees with the quality block')
+    return report
+
+
+def verify_reuse(root, stored_report):
+    """No-recompute assertion for --reuse-analysis.
+
+    The stored report may only be reused when its manifest digest equals
+    the manifest recomputed from the current inputs, pricing and code.
+    Raises ManifestMismatch otherwise (including a report with no
+    manifest at all).
+    """
+    stored = stored_report.get('manifest') if isinstance(stored_report, dict) else None
+    if not stored or 'manifest_digest' not in stored:
+        raise ManifestMismatch(
+            'Stored report has no evidence manifest; rebuild instead of reusing it')
+    current = build_manifest(root)
+    if stored['manifest_digest'] != current['manifest_digest']:
+        raise ManifestMismatch(
+            'Stored report manifest digest does not match the current inputs '
+            'and code; rebuild instead of reusing it')
+    return stored_report
+
 def build_report(root):
     root=Path(root)
     path=root/'demo/pseg_interval_15min.csv'
@@ -527,7 +754,7 @@ def build_report(root):
     winter_days=daily[(daily.index.month.isin([12,1,2])) & daily.usable]
     forecast = forecast_analysis(daily)
     history = pd.read_csv(root/'demo/pseg_bills.csv', parse_dates=['period_start', 'period_end'])
-    return {'schema_version':1,'dataset_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
+    report = {'schema_version':1,'dataset_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),
             'holidays':[d.strftime('%Y-%m-%d') for d in USFederalHolidayCalendar().holidays('2025-01-01','2030-12-31')],
             'household':{'region':'Long Island, NY','ac':'individual room units',
                          'heating':'building paid; excluded','ev':False,'solar':'not confirmed'},
@@ -550,3 +777,5 @@ def build_report(root):
                        'shift_ceiling_full_periods_usd':sum(r['shift_ceiling'] for r in full)},
             'sources':{'rates':RATE_SOURCE,'weather':'https://open-meteo.com/en/docs/historical-weather-api',
                        'method':'https://www.energy.gov/cmei/femp/measurement-and-verification-options-federal-energy-and-water-saving-projects'}}
+    report['manifest'] = build_manifest(root)
+    return validate_report_contract(report)
