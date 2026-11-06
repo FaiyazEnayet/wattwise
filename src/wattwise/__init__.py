@@ -18,7 +18,7 @@ from .disagg import disaggregate, learn_shapes
 from .forecast import BillForecaster, forecast_month_bill
 from .anomalies import daily_anomalies, explain_anomaly, typical_weekday_profile
 from .weather import temperature_sensitivity, degree_days
-from .optimize import optimize_load_shift, optimize_month
+from .optimize import optimize_consecutive_cycles, optimize_load_shift, optimize_month
 from .whatif import solar_scenario, ev_scenario, heat_pump_scenario
 from .analyze import (monthly_bill, compare_plans, peak_share,
                       appliance_breakdown, savings_waterfall)
@@ -36,7 +36,7 @@ __all__ = [
     "BillForecaster", "forecast_month_bill",
     "daily_anomalies", "explain_anomaly", "typical_weekday_profile",
     "temperature_sensitivity", "degree_days",
-    "optimize_load_shift", "optimize_month",
+    "optimize_consecutive_cycles", "optimize_load_shift", "optimize_month",
     "solar_scenario", "ev_scenario", "heat_pump_scenario",
     "monthly_bill", "compare_plans", "peak_share",
     "appliance_breakdown", "savings_waterfall",
