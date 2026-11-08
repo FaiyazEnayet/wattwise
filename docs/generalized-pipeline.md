@@ -1,0 +1,142 @@
+# Running WattWise on another household
+
+The frozen report and the measured loaders describe one household.
+`wattwise.household` is the reusable path: it runs the same kind of
+summary (totals, peak share under a time-of-use tariff, a bill estimate
+and a bill reconciliation) on files any household keeps privately on
+its own machine. Nothing in this path reads the measured household's
+data, and nothing needs to leave the machine it runs on.
+
+## Your files stay local
+
+Prepare two CSVs in the documented schemas. Keep them in a private
+folder of your own; the examples below use a folder called `my-home/`
+that is never committed anywhere.
+
+Interval CSV, canonical format (one row per interval; hourly,
+15-minute and other regular cadences all work):
+
+```csv
+timestamp,kwh
+2026-01-05T00:00:00,0.1234
+2026-01-05T01:00:00,0.0981
+```
+
+- `timestamp` is local wall time as exported; the file carries no UTC
+  offset and none is invented.
+- Rows are strictly increasing, with no duplicate timestamps.
+- `kwh` is finite and nonnegative.
+
+A utility export with `Start,kWh,kW` columns and
+`%m/%d/%Y %I:%M:%S %p` timestamps is accepted with
+`input_format="pseg"` in Python, or `--format pseg` on the command
+line.
+
+Bill CSV, one row per billed period, boundaries [start, end):
+
+```csv
+period_start,period_end,kwh,bill_usd
+2026-01-05,2026-02-05,612.4,181.20
+```
+
+`kwh` and `bill_usd` may be blank for a period the utility has not
+quantified yet. Periods must not overlap.
+
+Any other columns, unparseable values, duplicate or out-of-order
+timestamps, negative energy or overlapping periods raise
+`SchemaError` with the reason. A file that does not match the schema
+fails loudly instead of being priced as if it did.
+
+## Declare your tariff
+
+A tariff is a small object with a name, a per-timestamp marginal
+price, an energy charge and a fixed charge. Two declared-parameter
+implementations cover the common residential shapes, and both can be
+built from a JSON spec:
+
+```json
+{"kind": "flat", "name": "My flat rate", "delivery_per_kwh": 0.11,
+ "supply_per_kwh": 0.13, "daily_service_charge": 0.50}
+```
+
+```json
+{"kind": "tou", "name": "My time-of-use rate",
+ "peak_delivery_per_kwh": 0.21, "offpeak_delivery_per_kwh": 0.10,
+ "peak_supply_per_kwh": 0.28, "offpeak_supply_per_kwh": 0.11,
+ "daily_service_charge": 0.55, "peak_start_hour": 15, "peak_end_hour": 19}
+```
+
+The PSEG Rate 194 class is also available through the same interface
+as `rate194_tariff()`. Tiered block pricing that needs a monthly total
+(Rate 180's summer tier) is not part of this per-interval interface;
+it keeps its existing path in `wattwise.analyze`.
+
+## Run it
+
+Command line:
+
+```sh
+wattwise household --id my-home --intervals my-home/intervals.csv \
+    --bills my-home/bills.csv --tariff-json my-home/tariff.json \
+    --out my-home/report.json
+```
+
+Python:
+
+```python
+from wattwise.household import (HouseholdDataset, build_household_report,
+                                load_household_bills,
+                                load_household_intervals, tariff_from_spec)
+
+dataset = HouseholdDataset(
+    household_id="my-home",
+    intervals=load_household_intervals("my-home/intervals.csv"),
+    bills=load_household_bills("my-home/bills.csv"),
+    tariff=tariff_from_spec({"kind": "flat", "name": "My flat rate",
+                             "delivery_per_kwh": 0.11,
+                             "supply_per_kwh": 0.13,
+                             "daily_service_charge": 0.50}))
+report = build_household_report([dataset])
+```
+
+The household id is an anonymous label you choose (a lowercase slug
+such as `my-home`). Use a label, never a name, an address or an
+account number: the id is the only identifier the report carries.
+
+## How results are reported
+
+The report has two separate sections:
+
+- `within_home`: one summary per household, computed only from that
+  household's files and its own tariff: coverage, total and mean
+  daily kWh, peak share where the tariff has a peak window, the bill
+  estimate, and the reconciliation of interval sums against the
+  household's billed periods.
+- `cross_home`: labeled aggregates over the per-home summaries only
+  (how many homes, each home's total attributed to that home, and the
+  min/median/max of mean daily use). Intervals are never pooled
+  across homes, and aggregates over a few homes describe only those
+  homes. They are not population estimates and say nothing about
+  households that were not run through the pipeline.
+
+Output is deterministic: the same inputs produce byte-identical
+canonical JSON on repeated runs.
+
+## The public synthetic fixture
+
+Public CI cannot use any real household's files, so
+`tests/fixtures/synthetic/` carries two small synthetic households
+(62 days of hourly intervals each, two billed periods each, and their
+tariff declarations in `households.json`) plus `example_report.json`,
+the report the pipeline produces for them.
+
+The fixture is genuinely synthetic. It is generated by
+`scripts/make_synthetic_fixture.py` from the declared process in
+`wattwise.synthetic`: invented round-number parameters (a constant
+base load, Gaussian morning and evening bumps, a weekend scale, a
+cold term driven by a synthetic temperature curve, and seeded
+Gaussian noise), with fixed seeds, rounded to 4 decimal places. No
+measured household data is read, sampled, perturbed or transformed
+to make it, and rerunning the generator reproduces the committed
+files byte for byte. The synthetic homes exercise the validated path
+end to end; their numbers are not findings about any real household.

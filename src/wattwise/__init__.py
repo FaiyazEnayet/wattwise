@@ -24,6 +24,10 @@ from .analyze import (monthly_bill, compare_plans, peak_share,
                       appliance_breakdown, savings_waterfall)
 from .insights import (forecast_next_bill, peak_drift, what_if,
                        seasonal_outlook, cost_drivers, detect_anomalies)
+from .household import (FlatTariff, TimeOfUseTariff, HouseholdDataset,
+                        SchemaError, build_household_report,
+                        load_household_bills, load_household_intervals,
+                        rate194_tariff, summarize_household, tariff_from_spec)
 
 __all__ = [
     "Rate180", "Rate194", "is_peak_hour", "is_summer",
@@ -42,6 +46,10 @@ __all__ = [
     "appliance_breakdown", "savings_waterfall",
     "forecast_next_bill", "peak_drift", "what_if",
     "seasonal_outlook", "cost_drivers", "detect_anomalies",
+    "FlatTariff", "TimeOfUseTariff", "HouseholdDataset", "SchemaError",
+    "build_household_report", "load_household_bills",
+    "load_household_intervals", "rate194_tariff", "summarize_household",
+    "tariff_from_spec",
 ]
 
 __version__ = "1.2.0"
