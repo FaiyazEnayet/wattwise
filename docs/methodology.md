@@ -56,7 +56,7 @@ The AC calculator uses user-entered input power, avoided runtime and affected da
 
 The descriptive weather model relates daily energy to weekday indicators and cooling degree-days above 65°F. Its cooling slope is constrained nonnegative. Heating degree-days are not assigned to the household's heating cost. Two hundred moving-week bootstrap resamples report an 80% slope range.
 
-On this dataset, the fitted cooling slope is approximately 0.728 kWh per cooling degree-day, with an 80% bootstrap range of 0.584 to 0.853. The final 56-day conditional test has MAE approximately 2.744 kWh/day, worse than the fixed earlier-weekday baseline at 1.846 kWh/day. The dashboard shows that failure as-is. The model stays in the tool as a descriptive one; it is not promoted as verified AC attribution. The conditional evaluation uses realized weather, not weather forecasts available at issuance time.
+On this dataset, the fitted cooling slope is approximately 0.724 kWh per cooling degree-day, with an 80% bootstrap range of 0.584 to 0.862. The final 56-day conditional test has MAE approximately 1.990 kWh/day, worse than the fixed earlier-weekday baseline at 1.544 kWh/day. The dashboard shows that failure as-is. The model stays in the tool as a descriptive one; it is not promoted as verified AC attribution. The conditional evaluation uses realized weather, not weather forecasts available at issuance time.
 
 Daily-pattern clustering uses three deterministic k-means groups on normalized complete 24-hour profiles. Groups describe load shapes only. They are not occupancy labels or discovered appliances. Weather residual alerts use a robust three-MAD threshold on the descriptive fit; they are candidates for investigation, not validated live alerts or evidence of waste.
 

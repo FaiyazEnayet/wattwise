@@ -46,7 +46,7 @@ WattWise studies my household's electricity use and asks which change is worth m
 | Final 28-day forecast MAE | Weekly persistence 1.749; selected autoregression 1.753 kWh/day |
 | Separate neural benchmark, final 28-day daily MAE | 2.091 kWh/day, conditional on realized weather; below the baselines on the reported selection MAE but above weekly persistence (1.749) and autoregression (1.753) on the final holdout. |
 | Separate forecast tournament decision | Weekly persistence retained under the recorded adoption rule. Ridge, constrained tree, neural and ensemble have higher cumulative MAE at both the 7- and 14-day holdout horizons under the no-future-weather protocol. |
-| Cooling conditional holdout MAE | 2.744 kWh/day versus 1.846 for the weekday baseline; the cooling model loses |
+| Cooling conditional holdout MAE | 1.990 kWh/day versus 1.544 for the weekday baseline; the cooling model loses |
 
 Money subtotals are shown to cents and MAEs to three decimal places. The $12.71 tariff difference uses the unrounded report subtotals, rather than subtracting the displayed rounded amounts. The bill reconstruction difference is rounded to six decimal places.
 
