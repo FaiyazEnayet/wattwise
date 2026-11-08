@@ -1,0 +1,40 @@
+{
+  "generation": {
+    "method": "Seeded synthetic generator over invented round-number parameters (constant base load, Gaussian morning and evening bumps, a weekend scale, a cold term from a synthetic temperature curve, Gaussian noise; see wattwise.synthetic). No measured household data is read or transformed.",
+    "rounding": "energy rounded to 4 decimal places; bills to cents",
+    "window": "62 days of hourly intervals from 2026-01-05"
+  },
+  "households": [
+    {
+      "bills_file": "synthetic-a_bills.csv",
+      "household_id": "synthetic-a",
+      "intervals_file": "synthetic-a_intervals.csv",
+      "seed": 1201,
+      "tariff": {
+        "daily_service_charge": 0.5,
+        "delivery_per_kwh": 0.11,
+        "kind": "flat",
+        "name": "Synthetic flat",
+        "supply_per_kwh": 0.13
+      }
+    },
+    {
+      "bills_file": "synthetic-b_bills.csv",
+      "household_id": "synthetic-b",
+      "intervals_file": "synthetic-b_intervals.csv",
+      "seed": 1202,
+      "tariff": {
+        "daily_service_charge": 0.55,
+        "kind": "tou",
+        "name": "Synthetic time-of-use",
+        "offpeak_delivery_per_kwh": 0.1,
+        "offpeak_supply_per_kwh": 0.11,
+        "peak_delivery_per_kwh": 0.21,
+        "peak_end_hour": 19,
+        "peak_start_hour": 15,
+        "peak_supply_per_kwh": 0.28
+      }
+    }
+  ],
+  "schema": "wattwise-synthetic-fixture/1"
+}
