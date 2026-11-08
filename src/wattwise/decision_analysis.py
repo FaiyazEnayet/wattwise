@@ -375,14 +375,29 @@ def forecast_analysis(daily):
                 # No calibration target may extend into the final holdout.
                 if i<56 and target_dates[-1]<=origins[55]:calibration_errors.append(error)
                 elif i>=56:held_errors.append(error)
-            bounds=np.quantile(calibration_errors,[.1,.9])
-            empirical=float(np.mean((np.array(held_errors)>=bounds[0]) & (np.array(held_errors)<=bounds[1])))
+            # Same convention as wattwise.tournament._horizon_rows: a
+            # horizon with no complete calibration window reports its
+            # coverage as null, and one with no complete holdout window
+            # (e.g. every 28-day window crossing an excluded DST day)
+            # reports its holdout metrics as null, instead of failing
+            # on an empty mean or quantile.
+            bounds=(np.quantile(calibration_errors,[.1,.9])
+                    if calibration_errors else None)
+            if bounds is not None and held_errors:
+                empirical=float(np.mean((np.array(held_errors)>=bounds[0]) & (np.array(held_errors)<=bounds[1])))
+            else:
+                empirical=None
+            if held_errors:
+                mae=float(np.mean(np.abs(held_errors)))
+                bias=float(-np.mean(held_errors))
+            else:
+                mae=None; bias=None
             horizon_rows.append({'model':method,'horizon':horizon,'holdout_origins':len(held_errors),
                                  'calibration_origins':len(calibration_errors),
-                                 'mae_kwh':float(np.mean(np.abs(held_errors))),
-                                 'bias_kwh':float(-np.mean(held_errors)),
+                                 'mae_kwh':mae,
+                                 'bias_kwh':bias,
                                  'coverage_80':empirical})
-            if method==chosen:cumulative_intervals[str(horizon)]=list(map(float,bounds))
+            if method==chosen and bounds is not None:cumulative_intervals[str(horizon)]=list(map(float,bounds))
     future=pd.date_range(daily.index[-1]+pd.Timedelta(days=1),periods=35,freq='D')
     # If the final export day is partial, forecast it separately for the open bill.
     prediction=predict_daily(history,future,chosen)
@@ -405,7 +420,7 @@ def forecast_analysis(daily):
             'seven_day_interval_80':[max(0.,float(prediction[:7].sum()+v)) for v in cumulative_intervals['7']],
             'horizon_results':horizon_rows,
             'cumulative_error_bounds':cumulative_intervals,
-            'note':'Chronological selection and untouched final 28-day evaluation. Future multiday predictions are recursive. Daily bands resample seven-day residual blocks; seven-day total bounds use chronological cumulative errors whose calibration targets end before the holdout. Origins overlap and are not independent. The 28-day holdout admits only one complete 28-day forecast per model. Partial final day is excluded.'}
+            'note':'Chronological selection and untouched final 28-day evaluation. Future multiday predictions are recursive. Daily bands resample seven-day residual blocks; seven-day total bounds use chronological cumulative errors whose calibration targets end before the holdout. Origins overlap and are not independent. The 28-day holdout admits at most one complete 28-day forecast per model, and a horizon with no complete holdout window reports null metrics. Partial final day is excluded.'}
 
 
 def load_shapes(iv, daily):

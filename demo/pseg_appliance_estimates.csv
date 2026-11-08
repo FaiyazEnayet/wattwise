@@ -44,3 +44,11 @@ period_start,period_end,category,dollars_usd
 2026-09-02,2026-10-01,refrigeration,6
 2026-09-02,2026-10-01,lighting,4
 2026-09-02,2026-10-01,taxes_fees,27
+2026-10-02,2026-11-02,laundry,16
+2026-10-02,2026-11-02,other,15
+2026-10-02,2026-11-02,always_on,12
+2026-10-02,2026-11-02,entertainment,10
+2026-10-02,2026-11-02,cooking,9
+2026-10-02,2026-11-02,refrigeration,7
+2026-10-02,2026-11-02,lighting,6
+2026-10-02,2026-11-02,taxes_fees,27

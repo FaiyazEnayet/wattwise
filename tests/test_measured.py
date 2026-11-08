@@ -26,13 +26,19 @@ DEMO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "demo")
 def test_billing_history_integrity():
     bills = load_billing_history()
     billed = bills[bills["bill_usd"].notna()]
-    # Fourteen exact portal bills, Aug 2025 through Oct 2026.
-    assert len(billed) == 14
-    assert billed["bill_usd"].sum() == pytest.approx(1493.31, abs=0.01)
+    # Fifteen issued bills, Aug 2025 through Nov 2026.
+    assert len(billed) == 15
+    assert billed["bill_usd"].sum() == pytest.approx(1595.67, abs=0.01)
     sep = bills[bills["period_start"] == pd.Timestamp("2026-09-02")].iloc[0]
     assert sep["kwh"] == pytest.approx(320.25, abs=0.01)
     assert sep["bill_usd"] == pytest.approx(109.01, abs=0.001)
     assert sep["days"] == 30
+    # The Oct-Nov 2026 bill, finalized from its bill email and the
+    # portal bill breakdown (314 kWh, $102.36, 32 days).
+    oct26 = bills[bills["period_start"] == pd.Timestamp("2026-10-02")].iloc[0]
+    assert oct26["kwh"] == pytest.approx(314, abs=0.01)
+    assert oct26["bill_usd"] == pytest.approx(102.36, abs=0.001)
+    assert oct26["days"] == 32
     # Exact portal chain: bill dates + days-in-bill, periods chained.
     aug25 = bills[bills["period_start"] == pd.Timestamp("2025-08-01")].iloc[0]
     assert aug25["bill_usd"] == pytest.approx(138.98, abs=0.001)
@@ -180,14 +186,14 @@ def test_measured_profile_follows_subperiod_trend():
 
 def test_history_summary_aggregates():
     s = history_summary()
-    assert s["billed_periods"] == 14
-    assert s["bills_total_usd"] == pytest.approx(1493.31, abs=0.01)
-    assert s["measured_kwh_periods"] == 3
-    assert s["measured_kwh_total"] == pytest.approx(1366.88, abs=0.01)
+    assert s["billed_periods"] == 15
+    assert s["bills_total_usd"] == pytest.approx(1595.67, abs=0.01)
+    assert s["measured_kwh_periods"] == 4
+    assert s["measured_kwh_total"] == pytest.approx(1680.88, abs=0.01)
     assert s["chart_estimated_kwh_periods"] == 9
     assert s["chart_estimated_kwh_total"] == pytest.approx(2400.0, abs=0.01)
-    assert s["full_kwh_periods"] == 3
-    assert s["full_kwh_total"] == pytest.approx(1366.88, abs=0.01)
+    assert s["full_kwh_periods"] == 4
+    assert s["full_kwh_total"] == pytest.approx(1680.88, abs=0.01)
     assert s["seasonal_max_kwh"] == pytest.approx(619.39, abs=0.01)
     assert s["seasonal_max_period"] == "2026-07-02"
     assert s["seasonal_min_kwh"] == 195
@@ -228,9 +234,9 @@ def test_data_files_contain_no_pii():
 
 def test_intervals_load_and_total():
     iv = load_intervals()
-    # Full-year export: 2025-09-19 to 2026-10-19.
-    assert len(iv) == 37976
-    assert iv["kwh"].sum() == pytest.approx(4086.55, abs=1.0)
+    # Full export: 2025-09-19 to 2026-11-07.
+    assert len(iv) == 39800
+    assert iv["kwh"].sum() == pytest.approx(4264.91, abs=1.0)
     assert set(iv.columns) == {"kwh", "kw"}
 
 
@@ -238,7 +244,7 @@ def test_interval_reconciliation_matches_billed_kwh():
     """End-exclusive periods and line-item totals remove the extra-day bias."""
     rows = interval_reconciliation()
     full = [r for r in rows if r["billed_kwh"] and r["n_intervals"] >= 28 * 96]
-    assert len(full) == 12
+    assert len(full) == 13
     worst = 0.0
     for r in full:
         err = 100 * (r["interval_kwh"] - r["billed_kwh"]) / r["billed_kwh"]
@@ -255,6 +261,14 @@ def test_interval_peak_reproduces_billed_peak():
     det = pd.read_csv(os.path.join(DEMO, "pseg_rates_detailed.csv"))
     billed_peak = {r["period_start"]: r["peak_kwh"]
                    for _, r in det.iterrows()}
+    # Periods without a line-item extraction still carry a billed peak
+    # in the monthly table (portal bill breakdown); use it as the
+    # reference for those periods instead of skipping them.
+    monthly = pd.read_csv(os.path.join(DEMO, "pseg_monthly.csv"))
+    for _, r in monthly.iterrows():
+        key = str(pd.Timestamp(r["period_start"]).date())
+        if key not in billed_peak and pd.notna(r["kwh_peak"]):
+            billed_peak[key] = r["kwh_peak"]
     for r in rows:
         if r["billed_kwh"] is None or r["n_intervals"] < 28 * 96:
             continue

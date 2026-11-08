@@ -57,10 +57,10 @@
     }
   ],
   "history": {
-    "billed_periods": 14,
-    "bills_total_usd": 1493.31,
-    "measured_kwh_periods": 3,
-    "measured_kwh_total": 1366.88,
+    "billed_periods": 15,
+    "bills_total_usd": 1595.67,
+    "measured_kwh_periods": 4,
+    "measured_kwh_total": 1680.88,
     "chart_estimated_kwh_periods": 9,
     "chart_estimated_kwh_total": 2400.0,
     "first_period_start": "2025-08-01",
@@ -69,8 +69,8 @@
     "anchor_offpeak_kwh": 281.0,
     "anchor_energy_charges_usd": 82.0,
     "anchor_taxes_fees_usd": 27.0,
-    "full_kwh_periods": 3,
-    "full_kwh_total": 1366.88,
+    "full_kwh_periods": 4,
+    "full_kwh_total": 1680.88,
     "seasonal_max_kwh": 619.39,
     "seasonal_max_period": "2026-07-02",
     "seasonal_min_kwh": 195.0,
@@ -78,13 +78,13 @@
     "seasonal_ratio": 3.18
   },
   "interval_validation": {
-    "periods_with_full_interval_coverage": 12,
+    "periods_with_full_interval_coverage": 13,
     "interval_kwh_vs_billed_kwh_max_abs_pct": 0.48,
-    "interval_kwh_vs_billed_kwh_mean_abs_pct": 0.21,
+    "interval_kwh_vs_billed_kwh_mean_abs_pct": 0.2,
     "sep2026_interval_kwh": 320.75,
     "sep2026_interval_peak_kwh": 39.08,
     "sep2026_billed_peak_kwh": 39.0
   },
-  "generated_at": "2026-10-20T00:01:14.717037",
+  "generated_at": "2026-11-08T06:36:22.373853",
   "data_note": "MEASURED PSEG Long Island data. Period kWh totals, appliance mix and bills come from utility emails (weekly usage summaries, bill notices, appliance dollar estimates) and the utility's customer portal (exact bill history, yearly energy chart, monthly time-of-day summary); see demo/pseg_bills.csv, demo/pseg_monthly.csv and demo/pseg_appliance_estimates.csv. The intraday hourly shape is measured: 15-minute smart-meter intervals (Sep 19 - Oct 1 use each date's own profile; earlier days the measured fall average shape). Only the appliance split within each hour is modeled, so optimizer savings are model outputs on a measured profile."
 }

@@ -15,7 +15,7 @@
   <a href="#run-locally"><img src="https://img.shields.io/badge/Run-Locally-193128?style=for-the-badge&amp;labelColor=0b1915" alt="Run it locally"></a>
 </p>
 
-WattWise studies my household's electricity use and asks which change is worth making, and what evidence would show that it saved money. It uses 37,976 real fifteen-minute smart-meter readings, 13 detailed utility bills, an additional earlier bill and matched town-level weather. Original measurements, reconstructed accounting, forecasts and counterfactual scenarios remain distinct.
+WattWise studies my household's electricity use and asks which change is worth making, and what evidence would show that it saved money. It uses 39,800 real fifteen-minute smart-meter readings, 13 detailed utility bills, an additional earlier bill and matched town-level weather. Original measurements, reconstructed accounting, forecasts and counterfactual scenarios remain distinct.
 
 <p align="center"><a href="https://faiyazenayet.github.io/wattwise/docs/dashboard.html"><img src="docs/analysis-demo.gif" alt="Chronological measured electricity"></a></p>
 
@@ -37,14 +37,14 @@ WattWise studies my household's electricity use and asks which change is worth m
 
 | Check | Current evidence |
 |---|---|
-| Original export | 37,976 intervals; 4,086.55 kWh; September 19, 2025 through October 19, 2026 at 14:45 |
+| Original export | 39,800 intervals; 4,264.91 kWh; September 19, 2025 through November 7, 2026 at 14:45 |
 | Detailed bills and interval coverage | 13 detailed bills; 12 fully covered by the interval export, all within 0.5% of billed energy. The September 3 to October 2, 2025 bill starts before the export and has partial interval coverage. |
-| Billing history | 14 issued bills: the 13 detailed bills plus one earlier history-only bill; a separate unbilled row is not counted as an issued bill. |
+| Billing history | 15 issued bills: the 13 detailed bills, one earlier history-only bill, and the October 2026 bill documented by its bill email and portal breakdown. |
 | Bill reconstruction | Maximum unrounded difference about $0.005136 over 13 detailed bills, using their stored inputs |
 | Standardized annual Rate 194 subtotal | $1,148.17 energy plus service under declared replay assumptions |
 | Cheapest replay alternative | Rate 195 at $1,135.45, only $12.71 below Rate 194; excludes adjustments and does not establish actual enrollment savings |
-| Final 28-day forecast MAE | Weekly persistence 1.564; selected autoregression 1.568 kWh/day |
-| Separate neural benchmark, final 28-day daily MAE | 2.091 kWh/day, conditional on realized weather; below the baselines on the reported selection MAE but above weekly persistence (1.564) and autoregression (1.568) on the final holdout. |
+| Final 28-day forecast MAE | Weekly persistence 1.749; selected autoregression 1.753 kWh/day |
+| Separate neural benchmark, final 28-day daily MAE | 2.091 kWh/day, conditional on realized weather; below the baselines on the reported selection MAE but above weekly persistence (1.749) and autoregression (1.753) on the final holdout. |
 | Separate forecast tournament decision | Weekly persistence retained under the recorded adoption rule. Ridge, constrained tree, neural and ensemble have higher cumulative MAE at both the 7- and 14-day holdout horizons under the no-future-weather protocol. |
 | Cooling conditional holdout MAE | 2.744 kWh/day versus 1.846 for the weekday baseline; the cooling model loses |
 
@@ -87,7 +87,7 @@ Weather metadata records its provider and date range; exact request parameters s
 
 `demo/pseg_interval_15min.csv` stores interval kWh and average kW. `demo/pseg_rates_detailed.csv` supplies actual rates and accounting components. `demo/pseg_bills.csv` retains the longer history and earlier source estimates. `demo/pseg_appliance_estimates.csv` contains utility dollar estimates. `demo/household_weather.csv` contains Open-Meteo ERA5 reanalysis rather than home-sensor measurements; its provider, date range and units are in `demo/household_weather.metadata.json`. `demo/analysis.json` contains the results and a full evidence manifest: input paths, hashes, row counts and parser/timestamp conventions; pricing assumptions and tariff version; an analysis-code fingerprint; a manifest digest; and build annotations for the environment and Git revision. Build annotations are excluded from the reuse digest. The [methodology](docs/methodology.md) defines source precedence, calendar boundaries, counterfactual assumptions and validation protocols.
 
-The normal `python scripts/verify_frozen_outputs.py` check compares the report at nine significant digits after normalizing its build annotations, and checks the dashboard structure and application code with the embedded payload and Plotly bundle masked out. The current artifacts pass that check. The uploaded dashboard payload also equals the committed report exactly. The optional `--strict` dashboard byte comparison fails across the checked environments because build metadata and unrounded numerical values differ. Byte-exact dashboard reproducibility is not claimed.
+The normal `python scripts/verify_frozen_outputs.py` check compares the report at nine significant digits after normalizing its build annotations, and checks the dashboard structure and application code with the embedded payload and Plotly bundle masked out. The current artifacts pass that check. The committed dashboard payload predates the November 2026 data update and is refreshed through the dashboard batch; the committed report and its manifest are current. The optional `--strict` dashboard byte comparison fails across the checked environments because build metadata and unrounded numerical values differ. Byte-exact dashboard reproducibility is not claimed.
 
 ## Limitations
 
@@ -96,7 +96,7 @@ The normal `python scripts/verify_frozen_outputs.py` check compares the report a
 - Alternative tariffs use the 2026 delivery schedule, a fixed editable supply assumption and calendar-month blocks. Taxes, adjustments, eligibility and actual billing-cycle block proration are excluded.
 - Flexible energy and removable watts are assumptions. Aggregate scenarios do not identify appliance jobs or prove comfort feasibility. The separate task scheduler does not reserve circuit capacity or operate devices.
 - Utility appliance costs are estimates. Weather associations and observational intervention comparisons do not establish causal appliance savings.
-- Forecast bands use empirical residuals. One-step daily accuracy is not multiday accuracy; the open-bill envelope is not a calibrated monthly interval. Forecast origins overlap, and the final holdout contains only one complete 28-day forecast per model.
+- Forecast bands use empirical residuals. One-step daily accuracy is not multiday accuracy; the open-bill envelope is not a calibrated monthly interval. Forecast origins overlap. In the current data every 28-day holdout window crosses the excluded November DST day, so the 28-day cumulative holdout metrics are null rather than estimated from incomplete windows.
 - Solar, fuel-switching and EV economics require additional data and are not included in the decision results.
 
 ## License

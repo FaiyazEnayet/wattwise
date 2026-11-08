@@ -13,4 +13,4 @@ period_start,period_end,bill_date,days,kwh,kwh_source,bill_usd,avg_daily_kwh,sou
 2026-07-02,2026-08-04,2026-08-06,33,619.39,measured,185.67,18.77,weekly usage summary + bill email
 2026-08-04,2026-09-02,2026-09-04,29,427.24,measured,126.33,14.73,weekly usage summary + bill email
 2026-09-02,2026-10-02,2026-10-07,30,320.25,measured,109.01,10.68,weekly usage summary + bill email + portal monthly summary
-2026-10-02,2026-11-03,,32,167.13,partial (measured through 2026-10-17),,,weekly usage summary; period not yet billed
+2026-10-02,2026-11-03,2026-11-06,32,314,measured,102.36,9.81,bill email + portal bill breakdown

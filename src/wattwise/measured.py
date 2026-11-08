@@ -6,12 +6,12 @@ demo/pseg_appliance_estimates.csv), extracted from PSEG Long Island
 emails with all identifying fields stripped:
 
 - A full year of 15-minute smart-meter intervals
-  (demo/pseg_interval_15min.csv): 37,976 rows, 2025-09-19 to
-  2026-10-19, 4,086.55 kWh. Aggregated to hourly, the intervals
+  (demo/pseg_interval_15min.csv): 39,800 rows, 2025-09-19 to
+  2026-11-07, 4,264.91 kWh. Aggregated to hourly, the intervals
   supply the intraday SHAPE of the measured profile (own-day shape
   where the export covers the date, season/day-type average shape
   otherwise). With end-exclusive periods and detailed line-item
-  totals, interval sums are within 0.49% of billed kWh for all 12
+  totals, interval sums are within 0.48% of billed kWh for all 13
   fully covered periods; the
   holiday-adjusted weekday 3-7 PM peak reproduces the billed peak
   kWh within a few kWh, validating the rate window.
@@ -21,7 +21,7 @@ emails with all identifying fields stripped:
   (demo/pseg_subperiod.csv) covering 2026-07-02 to 2026-10-17,
   used as the daily-total anchors.
 - Bill emails plus payment confirmations give the amount due per
-  period for 13 billed periods, Aug 2025 to Oct 2026 ($1,394.07
+  period for 14 billed periods, Aug 2025 to Nov 2026 ($1,496.43
   total). Where no bill email exists, the period dates are inferred
   from the payment date with a ~9-day lag calibrated on periods
   where both exist, and are labeled as such.
@@ -35,13 +35,14 @@ emails with all identifying fields stripped:
 Plus portal-sourced data from the utility's customer portal
 (screenshots, all identifying fields stripped):
 
-- Fourteen exact bills (2025-08-01 through 2026-10-02, $1,493.31
+- Fifteen exact bills (2025-08-01 through 2026-11-03, $1,595.67
   total): exact bill dates and days-in-bill; period dates chained
   backward from the known 2026-07-02 anchor, matching every portal
   day count and the verified 2026-02-03 and 2025-10-02 boundaries.
-- Monthly kWh for twelve periods from the portal's yearly energy
-  chart: measured totals for Jul/Aug/Sep 2026 (619.39 / 427.24 /
-  320.25 kWh), chart-estimated totals for the nine preceding
+- Monthly kWh for thirteen periods from the portal's yearly energy
+  chart and bill breakdowns: measured totals for Jul-Oct 2026
+  (619.39 / 427.24 / 320.25 / 314 kWh), chart-estimated totals for
+  the nine preceding
   periods, peak/off-peak splits (39 / 281 kWh measured for Sep 2026
   per the portal's monthly summary; chart estimates elsewhere) and
   the chart's average temperature curve. Chart estimates are labeled
@@ -211,7 +212,7 @@ def anchor_appliance_shares(end_use_seed: pd.DataFrame) -> dict:
 
 def load_intervals(path: str = None) -> pd.DataFrame:
     """Full year of 15-minute smart-meter intervals (2025-09-19 to
-    2026-10-19, 37,976 rows), the My Account CSV export transcribed
+    2026-11-07, 39,800 rows), the My Account CSV export transcribed
     verbatim (timestamps, kWh and kW only). Index: interval start
     timestamps; columns: kwh, kw."""
     path = path or os.path.join(_DEMO_DIR, "pseg_interval_15min.csv")

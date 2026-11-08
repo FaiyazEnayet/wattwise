@@ -41,7 +41,7 @@ for stop in np.linspace(12,len(daily),32).astype(int):
     ax.plot(dates[:stop],energy[:stop],color=AMBER,lw=1.5)
     ax.set(xlim=(dates[0],dates[-1]),ylim=(0,34),ylabel='Original daily energy (kWh)')
     ax.set_title('WattWise  |  A year of measured electricity',loc='left',pad=20,fontsize=18)
-    ax.text(0,.97,'37,976 original intervals  |  '+str(dates[stop-1]),transform=ax.transAxes,va='top',fontsize=10,color=GREEN)
+    ax.text(0,.97,'39,800 original intervals  |  '+str(dates[stop-1]),transform=ax.transAxes,va='top',fontsize=10,color=GREEN)
     ax.text(0,-.2,'Original utility export; historical daily totals revealed chronologically.',transform=ax.transAxes,fontsize=8)
     ax.grid(axis='y',color='#355246',alpha=.4);ax.spines[['top','right']].set_visible(False)
     buffer=io.BytesIO();fig.savefig(buffer,dpi=90);plt.close(fig);buffer.seek(0)
