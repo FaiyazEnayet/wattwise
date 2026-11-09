@@ -258,15 +258,13 @@ def _portfolio_html(raw):
     return render_html(root, 'wattwise', raw)[0]
 
 def main():
-    """Build the real-data decision dashboard; retain the original demo fallback."""
+    """Build the dashboard and its separately served analysis report."""
     from pathlib import Path
     from wattwise.decision_analysis import build_report
     root = Path(HERE).parent
-    if not (root / 'demo/pseg_interval_15min.csv').exists():
-        return legacy_main()
     import argparse
     from plotly.offline import get_plotlyjs
-    parser = argparse.ArgumentParser(description='Build the self-contained WattWise research dashboard')
+    parser = argparse.ArgumentParser(description='Build the WattWise research dashboard and analysis report')
     parser.add_argument('--out', default=str(root / 'docs/dashboard.html'))
     parser.add_argument('--reuse-analysis', action='store_true', help='Use an existing analysis.json after UI-only changes')
     args = parser.parse_args()
@@ -288,7 +286,7 @@ def main():
     fonts = json.loads((root / 'portfolio_ui/fonts.json').read_text(encoding='utf-8'))
     font_css = '\n'.join(fonts.get(f, '') for f in ['Sora', 'IBM Plex Mono'])
     parts = {'__FONTS__': font_css, '__CSS__': (ui/'style.css').read_text(encoding='utf-8'),
-             '__PLOTLY__': get_plotlyjs(), '__DATA__': json.dumps(report, separators=(',', ':'), allow_nan=False).replace('<', '\\u003c'),
+             '__PLOTLY__': get_plotlyjs(),
              '__JS__': (ui/'decisions.js').read_text(encoding='utf-8')+'\n'+(ui/'app.js').read_text(encoding='utf-8')}
     html = (ui/'index.html').read_text(encoding='utf-8')
     for marker, value in parts.items():
