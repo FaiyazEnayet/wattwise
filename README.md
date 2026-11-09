@@ -58,7 +58,7 @@ The separate neural benchmark in `demo/neural_forecast.json` uses realized targe
 
 ## Architecture
 
-`src/wattwise/decision_analysis.py` builds the full-history report. `dashboard_ui/decisions.js` contains pure, independently tested browser arithmetic. `scripts/make_dashboard.py` embeds the frozen report, Plotly and bundled Sora/IBM Plex Mono fonts once. The interface uses native controls, visible focus styles, bounded table scrolling, responsive CSS and reduced-motion rules without a frontend build framework.
+`src/wattwise/decision_analysis.py` builds the full-history report. `dashboard_ui/decisions.js` contains pure, independently tested browser arithmetic. `scripts/make_dashboard.py` embeds Plotly and the bundled Sora/IBM Plex Mono fonts once and no report data; the dashboard loads the current report from `demo/analysis.json` on each page load. The interface uses native controls, visible focus styles, bounded table scrolling, responsive CSS and reduced-motion rules without a frontend build framework.
 
 The existing `wattwise insights` command and legacy modules remain available. Their heuristic bands and seeded experiments are separate from the chronological evaluation in the new dashboard. `demo/analysis.json` is the source for the new interface.
 
