@@ -6,10 +6,9 @@ of the worktree, then compares:
 - the frozen report: canonical JSON equality (the manifest's git_head
   build annotation is normalized out; see wattwise.decision_analysis);
 - the compiled dashboard: a normalized deterministic digest of the
-  HTML with the embedded report payload and the Plotly library bundle
-  masked out, so template, style and application-script changes are
-  caught; the payload itself is verified through the report
-  comparison above.
+  HTML with only the Plotly library bundle masked out, so template,
+  style and application-script changes are caught. Both builds must
+  load the separately verified report and omit any embedded copy.
 
 With --strict, the dashboard comparison is a byte-for-byte comparison
 instead. Exit code 0 means the committed artifacts match a clean
@@ -20,6 +19,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -40,31 +40,25 @@ def _copy_tree(dst):
     shutil.copytree(ROOT, dst, ignore=ignore)
 
 
-import re
-
-_DATA_BLOCK = re.compile(
-    r'(<script id="analysisData" type="application/json">).*?(</script>)',
-    re.DOTALL)
 _PLOTLY_BLOCK = re.compile(
     r'(<script>)/\*\*\n\* plotly\.js.*?(</script>)',
     re.DOTALL)
 
 
 def _normalized_dashboard_digest(html_text):
-    """Digest of the compiled HTML with two volatile blocks masked out.
-
-    The report payload is verified through demo/analysis.json (the
-    dashboard embeds it deterministically), and the Plotly library
-    bundle is a third-party artifact whose bytes change with the
-    installed plotly version. Masking both keeps this check focused on
-    the compiled structure the project controls: template, styles and
-    application scripts. Use --strict for a full byte comparison.
-    """
-    masked, count = _DATA_BLOCK.subn(r"\1__REPORT_PAYLOAD__\2", html_text)
-    masked, plotly_count = _PLOTLY_BLOCK.subn(r"\1__PLOTLY_BUNDLE__\2", masked)
-    if count != 1 or plotly_count != 1:
-        return hashlib.sha256(html_text.encode("utf-8")).hexdigest()
+    """Compare all project-controlled HTML and scripts."""
+    masked = _PLOTLY_BLOCK.sub(r"\1__PLOTLY_BUNDLE__\2", html_text)
     return hashlib.sha256(masked.encode("utf-8")).hexdigest()
+
+
+def _loads_separate_report(html_text):
+    """Require the same-origin report request and reject inline report data."""
+    return (
+        re.search(r"""fetch\(\s*['"]\.\./demo/analysis\.json['"]""", html_text)
+        and not re.search(r"""id=['"]analysisData['"]""", html_text)
+        and not re.search(r'"daily"\s*:\s*\[\s*\{', html_text)
+        and "__DATA__" not in html_text
+    )
 
 
 def main(argv=None):
@@ -107,6 +101,8 @@ def main(argv=None):
             _normalized_dashboard_digest(rebuilt_html)
             == _normalized_dashboard_digest(committed_html))
         mode = "normalized digest comparison"
+    if not all(_loads_separate_report(html) for html in (committed_html, rebuilt_html)):
+        stale.append("docs/dashboard.html (missing live report fetch or contains embedded data)")
     if dashboard_ok:
         print(f"verify_frozen_outputs: docs/dashboard.html matches ({mode})")
     else:
