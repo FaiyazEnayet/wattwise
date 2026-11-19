@@ -13,6 +13,10 @@ of the worktree, then compares:
 With --strict, the dashboard comparison is a byte-for-byte comparison
 instead. Exit code 0 means the committed artifacts match a clean
 rebuild; 1 means at least one is stale; 2 means the rebuild failed.
+
+The metrics registry in experiments/registry.jsonl is validated first:
+a missing or hash-mismatched artifact, or a metric that no longer
+resolves to its artifact value, fails the check before any rebuild.
 """
 
 import argparse
@@ -27,8 +31,10 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 
+from evaluation.reporting import validate_registry  # noqa: E402
 from wattwise.decision_analysis import frozen_report_bytes  # noqa: E402
 
 IGNORE = {".git", ".venv", "__pycache__", ".pytest_cache"}
@@ -69,6 +75,14 @@ def main(argv=None):
 
     committed_report = json.loads((ROOT / "demo" / "analysis.json").read_text(encoding="utf-8"))
     committed_html = (ROOT / "docs" / "dashboard.html").read_text(encoding="utf-8")
+
+    registry_errors = validate_registry(ROOT)
+    if registry_errors:
+        print("verify_frozen_outputs: registry invalid:")
+        for error in registry_errors:
+            print(f"  - {error}")
+        return 1
+    print("verify_frozen_outputs: experiments/registry.jsonl valid")
 
     with tempfile.TemporaryDirectory(prefix="wattwise-verify-") as tmp:
         work = Path(tmp) / "tree"

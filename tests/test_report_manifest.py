@@ -145,7 +145,8 @@ def test_stage3_wattwise_1_clean_build_matches_frozen_report():
 def test_stage3_wattwise_1_stale_frozen_report_fails_verifier(tmp_path):
     # Copy the pieces the verifier needs into a clean tree.
     work = tmp_path / "tree"
-    for name in ["src", "scripts", "dashboard_ui", "portfolio_ui", "demo"]:
+    for name in ["src", "scripts", "dashboard_ui", "portfolio_ui", "demo",
+                 "evaluation", "experiments"]:
         shutil.copytree(ROOT / name, work / name)
     shutil.copy(ROOT / "pyproject.toml", work / "pyproject.toml")
     (work / "docs").mkdir()
