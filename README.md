@@ -93,6 +93,16 @@ The report above is one household's. The `wattwise.household` module generalizes
 
 The normal `python scripts/verify_frozen_outputs.py` check compares the report at nine significant digits after normalizing its build annotations, and checks the dashboard structure and application code with the Plotly bundle masked out. The artifacts pass that check. The dashboard loads the current report from `demo/analysis.json` on each page load. The optional `--strict` dashboard byte comparison varies across environments with different Plotly builds, and the check suite treats the normalized comparison above as the reproducibility standard.
 
+<!-- BEGIN REGISTERED RUNS -->
+Every published number in the Evidence table traces to a registered run in `experiments/registry.jsonl`. Each run records its artifact hash, input hashes, temporal split, and a reproduction command; `python scripts/verify_frozen_outputs.py` validates the registry and fails if an artifact is missing or changed.
+
+| Run ID | Result | Artifact | Reproduce |
+|---|---|---|---|
+| `forecast-tournament-e1` | Forecast model tournament (E1) | `demo/forecast_tournament.json` | `python scripts/run_forecast_tournament.py` |
+| `frozen-report-v1-2-0` | Frozen report (November 2026 inputs) | `demo/analysis.json` | `python scripts/make_dashboard.py` |
+| `neural-benchmark-fixed` | Neural forecaster benchmark (FIXED-neural) | `demo/neural_forecast.json` | `python scripts/run_neural_forecast.py` |
+<!-- END REGISTERED RUNS -->
+
 ## Limitations
 
 - Scope: one household and roughly one seasonal cycle; results describe this household, and the household module extends the same pipeline to additional homes.
