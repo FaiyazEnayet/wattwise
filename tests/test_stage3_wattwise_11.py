@@ -169,6 +169,42 @@ def test_stage3_wattwise_11_readme_block_matches_generated_section():
     assert match.group(0).strip() == render_registry_section(entries).strip()
 
 
+def test_stage3_wattwise_11_rebuilt_report_still_validates(tmp_path):
+    """A clean rebuild rewrites the report's build annotations only.
+
+    The registry hashes the frozen report over its canonical frozen
+    bytes, so the rebuilt file (new git revision recorded) must still
+    validate. This is the CI order: make_dashboard.py rebuilds the
+    report before verify_frozen_outputs.py runs.
+    """
+    root = tmp_path / "tree"
+    (root / "demo").mkdir(parents=True)
+    (root / "experiments").mkdir()
+    shutil.copy(ROOT / "experiments" / "registry.jsonl",
+                root / "experiments" / "registry.jsonl")
+    for name in ["analysis.json", "forecast_tournament.json",
+                 "neural_forecast.json", "pseg_interval_15min.csv",
+                 "pseg_rates_detailed.csv", "pseg_bills.csv",
+                 "pseg_appliance_estimates.csv", "household_weather.csv"]:
+        shutil.copy(ROOT / "demo" / name, root / "demo" / name)
+    assert validate_registry(root) == []
+    report_path = root / "demo" / "analysis.json"
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    report["manifest"]["git_head"] = "deadbeef-rebuilt"
+    report["manifest"]["environment"] = {"python": "3.12.99"}
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    assert validate_registry(root) == []
+
+
+def test_stage3_wattwise_11_unknown_hash_mode_rejected(tmp_path):
+    root, registry = _mini_registry(tmp_path)
+    entry = json.loads(registry.read_text(encoding="utf-8"))
+    entry["artifact_hash_mode"] = "magic"
+    registry.write_text(json.dumps(entry) + "\n", encoding="utf-8")
+    errors = validate_registry(root, registry)
+    assert errors and any("artifact_hash_mode" in e for e in errors)
+
+
 def test_stage3_wattwise_11_removed_artifact_fails_verifier(tmp_path):
     # Copy the pieces the verifier needs into a clean tree.
     work = tmp_path / "tree"

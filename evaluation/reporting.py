@@ -15,6 +15,14 @@ the value), so a published number can never dangle. A missing artifact,
 a changed hash, or a value that no longer matches the artifact all fail
 `validate_registry`, and `scripts/verify_frozen_outputs.py` runs that
 check on every invocation.
+
+An entry's `artifact_sha256` is normally the SHA-256 of the artifact
+file. The frozen report is the exception: a clean rebuild rewrites its
+build annotations (the recording git revision), so its raw bytes change
+while its content stays identical. Entries for it set
+`"artifact_hash_mode": "frozen"`, and the hash is taken over the
+canonical frozen bytes (`wattwise.decision_analysis.frozen_report_bytes`),
+which are stable across rebuilds by design.
 """
 
 import hashlib
@@ -29,7 +37,8 @@ ENTRY_FIELDS = {
     "run_id", "title", "artifact", "artifact_sha256", "inputs",
     "temporal_split", "metrics", "reproduction_command",
 }
-OPTIONAL_ENTRY_FIELDS = {"decision"}
+OPTIONAL_ENTRY_FIELDS = {"decision", "artifact_hash_mode"}
+HASH_MODES = {"raw", "frozen"}
 METRIC_FIELDS = {
     "name", "value", "unit", "estimator", "comparator", "n_origins",
     "uncertainty", "caveats", "artifact_key",
@@ -47,6 +56,17 @@ def _sha256_file(path):
 
 def _is_relative(path):
     return not Path(path).is_absolute() and ".." not in Path(path).parts
+
+
+def _artifact_hash(path, mode):
+    """Hash an artifact file, raw or over its canonical frozen bytes."""
+    if mode == "raw":
+        return _sha256_file(path)
+    if mode == "frozen":
+        from wattwise.decision_analysis import frozen_report_bytes
+        artifact = json.loads(Path(path).read_text(encoding="utf-8"))
+        return hashlib.sha256(frozen_report_bytes(artifact)).hexdigest()
+    raise RegistryError(f"unknown artifact_hash_mode: {mode!r}")
 
 
 def _resolve_key(artifact, key):
@@ -200,6 +220,10 @@ def validate_registry(root, path=None):
                 f"{label}: 'temporal_split' must record a 'description'")
         artifact_rel = entry["artifact"]
         artifact = None
+        hash_mode = entry.get("artifact_hash_mode", "raw")
+        if hash_mode not in HASH_MODES:
+            errors.append(
+                f"{label}: unknown artifact_hash_mode: {hash_mode!r}")
         if not isinstance(artifact_rel, str) or not _is_relative(artifact_rel):
             errors.append(f"{label}: 'artifact' must be a relative path")
         else:
@@ -207,7 +231,13 @@ def validate_registry(root, path=None):
             if not artifact_path.exists():
                 errors.append(f"{label}: artifact missing: {artifact_rel}")
             else:
-                if _sha256_file(artifact_path) != entry["artifact_sha256"]:
+                try:
+                    actual_hash = _artifact_hash(artifact_path, hash_mode)
+                except (RegistryError, json.JSONDecodeError,
+                        UnicodeDecodeError) as exc:
+                    errors.append(f"{label}: cannot hash artifact: {exc}")
+                    actual_hash = None
+                if actual_hash is not None and actual_hash != entry["artifact_sha256"]:
                     errors.append(
                         f"{label}: artifact sha256 mismatch: {artifact_rel}")
                 try:
