@@ -29,6 +29,18 @@ from scipy.optimize import LinearConstraint, Bounds, linprog, milp
 from .appliances import BY_NAME
 
 
+class SchedulerInfeasibleError(RuntimeError):
+    """No feasible schedule exists for the declared tasks and limits.
+
+    Raised when the exact scheduler cannot place every noninterruptible
+    cycle inside its window under the household power cap: either no
+    start hour fits the cycle in its window (a deadline violation by
+    construction) or the MILP solver reports the problem infeasible
+    (for example a power cap below a single appliance's draw). Input
+    problems such as a non-whole-hour cycle stay ValueError.
+    """
+
+
 @dataclass
 class OptimizationResult:
     hourly_optimized: pd.Series
@@ -177,7 +189,7 @@ def optimize_consecutive_cycles(hourly: pd.Series, end_use: pd.DataFrame,
         lo, hi = allowed[n]
         feasible = [h for h in range(lo, hi - cycles[n] + 1)]
         if not feasible:
-            raise ValueError(
+            raise SchedulerInfeasibleError(
                 f"{n} has no feasible start for a {cycles[n]} h cycle "
                 f"inside window [{lo}, {hi})")
         starts[n] = feasible
@@ -273,7 +285,7 @@ def optimize_consecutive_cycles(hourly: pd.Series, end_use: pd.DataFrame,
     res = milp(c, constraints=LinearConstraint(np.array(rows), lbs, ubs),
                integrality=integrality, bounds=Bounds(lb, ub))
     if not res.success:
-        raise RuntimeError(f"MILP failed: {res.message}")
+        raise SchedulerInfeasibleError(f"MILP failed: {res.message}")
     x = res.x
 
     X = np.zeros((len(names), n_h))
