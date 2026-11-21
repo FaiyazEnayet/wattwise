@@ -8,6 +8,12 @@ power cap, match brute-force enumeration on tiny instances, and never beat
 the relaxed LP lower bound beyond tolerance.
 
 Fixtures are synthetic toy days; no measured usage data is involved.
+
+E3 adds the seeded validation: on 20 seeded tiny instances the MILP
+objective matches exhaustive enumeration of every feasible start-time
+combination within 1e-6 currency units, with zero interrupted cycles,
+zero power-cap violations and zero deadline violations. Infeasible
+instances raise the typed SchedulerInfeasibleError.
 """
 
 import itertools
@@ -16,7 +22,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from wattwise.optimize import optimize_consecutive_cycles, optimize_load_shift
+from wattwise.optimize import (SchedulerInfeasibleError,
+                               optimize_consecutive_cycles,
+                               optimize_load_shift)
 
 COLS = ["baseload", "water_heater", "dishwasher", "laundry"]
 
@@ -168,7 +176,84 @@ def test_zero_demand_appliance_skipped():
 def test_infeasible_power_cap_raises():
     hourly, end_use = _day({"dishwasher": (2.2, 0)})
     prices = np.full(24, 0.10)
-    with pytest.raises(RuntimeError, match="MILP failed"):
+    with pytest.raises(SchedulerInfeasibleError, match="MILP failed"):
         optimize_consecutive_cycles(hourly, end_use, prices,
                                     flexible={"dishwasher": 1.1},
                                     power_cap_kw=0.01)
+
+
+def _brute_force_optimum(prices, demands, powers, window, power_cap_kw):
+    """Cheapest feasible schedule by enumerating every start combination.
+
+    demands/powers: {appliance: kWh / kW}. Each appliance runs one
+    contiguous block at nameplate power inside window; baseload is
+    1 kWh spread over the day. Combos that breach the power cap are
+    skipped. Returns the minimum daily cost, or None if no combo fits.
+    """
+    baseload = np.full(24, 1.0 / 24)
+    names = list(demands.keys())
+    starts = {}
+    for name in names:
+        length = int(round(demands[name] / powers[name]))
+        starts[name] = [h for h in range(window[0], window[1] - length + 1)]
+    best = None
+    for combo in itertools.product(*(starts[n] for n in names)):
+        load = baseload.copy()
+        for name, start in zip(names, combo):
+            length = int(round(demands[name] / powers[name]))
+            load[start:start + length] += powers[name]
+        if power_cap_kw is not None and (load > power_cap_kw + 1e-9).any():
+            continue
+        cost = float((load * prices).sum())
+        if best is None or cost < best:
+            best = cost
+    return best
+
+
+def test_milp_matches_brute_force_on_seeded_instances():
+    rng = np.random.default_rng(20261120)
+    windows = [(0, 24), (0, 12), (6, 18), (0, 8), (8, 20), (2, 10)]
+    caps = [None, 4.0, 5.0, 3.0]
+    powers = {"dishwasher": 1.1, "laundry": 2.8}
+    worst_diff = 0.0
+    for instance in range(20):
+        d_len = int(rng.integers(1, 4))  # dishwasher cycle, 1-3 h
+        l_len = int(rng.integers(1, 3))  # laundry cycle, 1-2 h
+        window = windows[int(rng.integers(0, len(windows)))]
+        cap = caps[int(rng.integers(0, len(caps)))]
+        prices = rng.uniform(0.05, 0.90, size=24)
+        demands = {"dishwasher": d_len * 1.1, "laundry": l_len * 2.8}
+        hourly, end_use = _day({"dishwasher": (demands["dishwasher"], 0),
+                                "laundry": (demands["laundry"], 0)})
+        r = optimize_consecutive_cycles(hourly, end_use, prices,
+                                        flexible=dict(powers),
+                                        window=window, power_cap_kw=cap)
+        best = _brute_force_optimum(prices, demands, powers, window, cap)
+        assert best is not None, f"instance {instance}: no feasible combo"
+        worst_diff = max(worst_diff, abs(r.cost_after - best))
+        assert abs(r.cost_after - best) < 1e-6, (
+            f"instance {instance}: MILP {r.cost_after:.6f} vs "
+            f"brute force {best:.6f}")
+        assert r.cost_after >= r.lower_bound_cost - 1e-6
+        for name, length in (("dishwasher", d_len), ("laundry", l_len)):
+            hours = _blocks(r.schedule, name)
+            assert len(hours) == length, f"instance {instance}: {name} ran {len(hours)} h, not {length}"
+            assert _is_contiguous(hours), f"instance {instance}: {name} cycle interrupted"
+            assert hours[0] >= window[0] and hours[-1] < window[1], (
+                f"instance {instance}: {name} missed its deadline window")
+            assert r.start_hours[name] == hours[0]
+            assert abs(r.schedule[name].sum() - demands[name]) < 1e-6
+        assert (r.hourly_optimized <= (cap if cap is not None else np.inf) + 1e-9).all(), (
+            f"instance {instance}: power cap breached")
+    assert worst_diff < 1e-6
+
+
+def test_infeasible_deadline_raises_typed_error():
+    # A 2 h dishwasher cycle cannot fit a 1 h window: a deadline
+    # infeasibility, not a bad input, so it is the typed error.
+    hourly, end_use = _day({"dishwasher": (2.2, 0)})
+    prices = np.full(24, 0.10)
+    with pytest.raises(SchedulerInfeasibleError, match="no feasible start"):
+        optimize_consecutive_cycles(hourly, end_use, prices,
+                                    flexible={"dishwasher": 1.1},
+                                    window=(10, 11))
