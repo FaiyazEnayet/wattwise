@@ -20,6 +20,9 @@ from .anomalies import daily_anomalies, explain_anomaly, typical_weekday_profile
 from .weather import temperature_sensitivity, degree_days
 from .optimize import (SchedulerInfeasibleError, optimize_consecutive_cycles,
                        optimize_load_shift, optimize_month)
+from .tariff_sweep import (documented_supply_grid,
+                       monthly_energy_cost,
+                       sweep_tariff_assumptions)
 from .whatif import solar_scenario, ev_scenario, heat_pump_scenario
 from .analyze import (monthly_bill, compare_plans, peak_share,
                       appliance_breakdown, savings_waterfall)
@@ -45,6 +48,8 @@ __all__ = [
     "optimize_load_shift", "optimize_month",
     "solar_scenario", "ev_scenario", "heat_pump_scenario",
     "monthly_bill", "compare_plans", "peak_share",
+    "documented_supply_grid", "monthly_energy_cost",
+    "sweep_tariff_assumptions",
     "appliance_breakdown", "savings_waterfall",
     "forecast_next_bill", "peak_drift", "what_if",
     "seasonal_outlook", "cost_drivers", "detect_anomalies",
